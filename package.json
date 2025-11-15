@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "compile": "compact compile contracts/*.compact",
+    "compile": "bash -lc 'mkdir -p build && for f in contracts/*.compact; do compact compile \"$f\" build; done'",
     "test": "jest",
     "deploy:testnet": "node scripts/deploy.js --network testnet",
     "deploy:mainnet": "node scripts/deploy.js --network mainnet"

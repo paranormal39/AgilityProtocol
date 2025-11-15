@@ -5,7 +5,7 @@ class ZKPaymentService {
     this.contractAddress = "0200b0fbc4fdcea1c8985262df48c80b0f99824005709a45f3ca40152835fb438cdc";
     this.contractName = "kyc-financial-demo";
     this.apiUrl = "http://localhost:6300/api";
-    this.aiUrl = "http://localhost:3002/api";
+    this.aiUrl = "http://localhost:3001/api";
     this.isInitialized = false;
   }
 

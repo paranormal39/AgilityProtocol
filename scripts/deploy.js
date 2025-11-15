@@ -41,8 +41,8 @@ async function main() {
   
   // Deploy contracts
   const contracts = [
-    'AgilityPayment',
-    'AgilityEscrow'
+    'privacy-kyc'
+    
   ];
   
   let allDeployed = true;
