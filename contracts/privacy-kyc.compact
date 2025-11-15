@@ -1,84 +1,183 @@
-// Privacy-Preserving KYC Contract for Agility Payment Portal
-// Uses Midnight Network's Compact language for zero-knowledge proofs
+// Privacy-Preserving KYC Demo - Simplified for Compact 0.18+
+// Agility - Midnight Summit
+//
+// This simplified version demonstrates the core concepts while being
+// compatible with Compact 0.18+ privacy requirements.
 
 pragma language_version >= 0.18 && < 0.19;
 
 import CompactStandardLibrary;
 
-// Ledger state for KYC management
+// ---------------------------------------------------------
+// Ledger state (simplified)
+// ---------------------------------------------------------
+
 export ledger admin: Uint<254>;
+
+// KYC state
 export ledger proofCounter: Uint<254>;
+export ledger currentProofId: Uint<254>;
+export ledger currentProofStatus: Uint<8>;
+export ledger currentVerificationLevel: Uint<8>;
+export ledger currentJurisdictionCommitment: Uint<254>;
+export ledger currentLimitCommitment: Uint<254>;
 
-// Verification levels (using Uint<8> instead of enum)
-// 0 = Basic, 1 = Standard, 2 = Enhanced, 3 = Institutional
-    
-// Initialize contract with admin
+// Card commitments
+export ledger currentCardCommitment: Uint<254>;
+export ledger currentCardNetworkCommitment: Uint<254>;
+export ledger currentCardExpiryCommitment: Uint<254>;
+
+// Shipping commitments
+export ledger currentShippingCommitment: Uint<254>;
+export ledger currentShippingRegionCommitment: Uint<254>;
+export ledger currentOrderCommitment: Uint<254>;
+
+// Cross-chain payment state
+export ledger currentPaymentId: Uint<254>;
+export ledger currentPaymentStatus: Uint<8>;
+export ledger currentPaymentKYCProofId: Uint<254>;
+export ledger currentPaymentCrossChainCommitment: Uint<254>;
+
+// Stats
+export ledger totalProofs: Uint<254>;
+export ledger totalPayments: Uint<254>;
+
+// ---------------------------------------------------------
+// Circuits
+// ---------------------------------------------------------
+
 export circuit setup(admin_address: Uint<254>): [] {
-    admin = disclose(admin_address);
+  admin = disclose(admin_address);
 }
 
-// Generate KYC proof with zero-knowledge verification
-export circuit generateKYCProof(
-    birthYear: Uint<254>,
-    passportValid: Uint<8>,
-    idCardValid: Uint<8>,
-    addressProofValid: Uint<8>,
-    fundsVerified: Uint<8>,
-    fundsAmount: Uint<254>,
-    verificationLevel: Uint<8>,
-    nullifier: Uint<254>
-): Uint<254> {
-    // Generate simple proof hash
-    return birthYear;
+// Simplified KYC registration (no conditional checks to avoid privacy issues)
+export circuit registerKYCWithCardAndShipping(
+  proofId: Uint<254>,
+  verificationLevel: Uint<8>,
+  jurisdictionCommitment: Uint<254>,
+  limitCommitment: Uint<254>,
+  cardCommitmentHash: Uint<254>,
+  cardNetworkCommitmentHash: Uint<254>,
+  cardExpiryCommitmentHash: Uint<254>,
+  shippingCommitmentHash: Uint<254>,
+  shippingRegionCommitmentHash: Uint<254>,
+  orderCommitmentHash: Uint<254>
+): Uint<8> {
+
+  // Store as current active proof (all parameters disclosed for ledger operations)
+  currentProofId = disclose(proofId);
+  currentProofStatus = 1;  // active
+  currentVerificationLevel = disclose(verificationLevel);
+  currentJurisdictionCommitment = disclose(jurisdictionCommitment);
+  currentLimitCommitment = disclose(limitCommitment);
+
+  // Store card commitments
+  currentCardCommitment = disclose(cardCommitmentHash);
+  currentCardNetworkCommitment = disclose(cardNetworkCommitmentHash);
+  currentCardExpiryCommitment = disclose(cardExpiryCommitmentHash);
+
+  // Store shipping commitments
+  currentShippingCommitment = disclose(shippingCommitmentHash);
+  currentShippingRegionCommitment = disclose(shippingRegionCommitmentHash);
+  currentOrderCommitment = disclose(orderCommitmentHash);
+
+  return 1;
 }
-    
-// Verify KYC proof without revealing personal data
+
+// Simplified verification (no conditional checks)
 export circuit verifyKYCProof(
-    proofId: Uint<254>,
-    requiredLevel: Uint<8>
+  proofId: Uint<254>,
+  requiredLevel: Uint<8>
 ): Uint<8> {
-    // Simple validation logic - return 1 for true, 0 for false
-    return 1;
+  // In a real implementation, this would do ZK verification
+  // For now, just return success to demonstrate the interface
+  return 1;
 }
-    
-// Revoke KYC proof (admin only)
+
+// Simplified card payment proof
+export circuit proveCardPaymentZK(
+  proofId: Uint<254>,
+  transactionAmountCommitment: Uint<254>,
+  merchantIdCommitment: Uint<254>,
+  cardProofOk: Uint<8>
+): Uint<8> {
+  // Store transaction details (disclosed for ledger operations)
+  currentPaymentId = disclose(proofId);
+  currentPaymentStatus = 1;  // pending
+  
+  return disclose(cardProofOk);
+}
+
+// Simplified shipping proof
+export circuit proveShippingAddressZK(
+  proofId: Uint<254>,
+  shippingProofOk: Uint<8>
+): Uint<8> {
+  return disclose(shippingProofOk);
+}
+
+// Simplified merchant view
+export circuit verifyMerchantView(
+  proofId: Uint<254>,
+  requiredLevel: Uint<8>,
+  allowedCountryCommitment: Uint<254>,
+  transactionAmountCommitment: Uint<254>,
+  merchantProofOk: Uint<8>
+): Uint<8> {
+  return disclose(merchantProofOk);
+}
+
+// Simplified courier view
+export circuit verifyCourierView(
+  proofId: Uint<254>,
+  courierProofOk: Uint<8>
+): Uint<8> {
+  return disclose(courierProofOk);
+}
+
+// KYC management
 export circuit revokeKYCProof(proofId: Uint<254>): [] {
-    // Simple revocation logic - store revocation
+  currentProofStatus = 2;  // revoked
 }
 
-// Check if nullifier has been used (prevents double-verification)
-export circuit isNullifierUsed(nullifier: Uint<254>): Uint<8> {
-    return 1;
-}
-
-// Get proof count for statistics
 export circuit getProofCount(): Uint<254> {
-    return 12345; // Fixed value for simplicity
+  return totalProofs;
 }
 
-// Prove age without revealing birth year
-export circuit proveAge(
-    birthYear: Uint<254>,
-    nullifier: Uint<254>,
-    minAge: Uint<254>
+// Cross-chain payment (simplified)
+export circuit registerCrossChainPayment(
+  paymentId: Uint<254>,
+  kycProofId: Uint<254>,
+  merchantIdCommitment: Uint<254>,
+  crossChainCommitment: Uint<254>,
+  amountCommitment: Uint<254>,
+  zkLinkProofOk: Uint<8>
 ): Uint<8> {
-    return 1; // Simplified - return 1 for valid
+
+  // Store payment details (all disclosed for ledger operations)
+  currentPaymentId = disclose(paymentId);
+  currentPaymentKYCProofId = disclose(kycProofId);
+  currentPaymentCrossChainCommitment = disclose(crossChainCommitment);
+  currentPaymentStatus = 1;  // pending
+
+  return disclose(zkLinkProofOk);
 }
 
-// Prove jurisdiction compliance without revealing exact location
-export circuit proveJurisdiction(
-    countryCode: Uint<254>,
-    nullifier: Uint<254>,
-    allowedCountry: Uint<254>
-): Uint<8> {
-    return 1; // Simplified - return 1 for valid
+export circuit markPaymentSettled(paymentId: Uint<254>): Uint<8> {
+  currentPaymentStatus = 2;  // settled
+  return 1;
 }
 
-// Prove transaction limit compliance
-export circuit proveTransactionLimit(
-    verifiedLimit: Uint<254>,
-    nullifier: Uint<254>,
-    transactionAmount: Uint<254>
-): Uint<8> {
-    return 1; // Simplified - return 1 for valid
+export circuit markPaymentRefunded(paymentId: Uint<254>): Uint<8> {
+  currentPaymentStatus = 3;  // refunded
+  return 1;
+}
+
+// Read-only helpers
+export circuit getPaymentStatus(paymentId: Uint<254>): Uint<8> {
+  return currentPaymentStatus;
+}
+
+export circuit getPaymentKYCProof(paymentId: Uint<254>): Uint<254> {
+  return currentPaymentKYCProofId;
 }
