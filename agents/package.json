@@ -1,0 +1,46 @@
+{
+  "name": "agi-seamless-crypto-agent",
+  "version": "1.0.0",
+  "description": "AGI - Seamless crypto abstraction AI agent with invisible DUST payments and ZK privacy",
+  "type": "module",
+  "main": "agi-server.js",
+  "scripts": {
+    "start": "node agi-server.js",
+    "dev": "node --watch agi-server.js",
+    "setup": "./setup-agent.sh",
+    "demo": "npm start"
+  },
+  "keywords": [
+    "privacy",
+    "e-commerce",
+    "zero-knowledge",
+    "midnight-network",
+    "ai-agent",
+    "blockchain",
+    "kyc",
+    "cross-chain"
+  ],
+  "author": "Agility Summit Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "@elizaos/core": "^0.1.7",
+    "@elizaos/plugin-node": "^0.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paranormal39/Agility-Summit"
+  },
+  "bugs": {
+    "url": "https://github.com/paranormal39/Agility-Summit/issues"
+  },
+  "homepage": "https://github.com/paranormal39/Agility-Summit#readme"
+}

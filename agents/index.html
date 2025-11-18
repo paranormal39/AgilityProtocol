@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGI - Seamless Crypto Shopping Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 24px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+            padding: 0 20px;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .feature p {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+        
+        .demo-section {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .demo-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        .tech-stack {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+        
+        .tech-stack h3 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tech-item .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="logo">🤖</div>
+        <h1>AGI</h1>
+        <p>The first AI assistant that makes crypto payments completely invisible to users</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🛍️</div>
+                <h3>Natural Shopping</h3>
+                <p>Users shop normally with regular conversations. No crypto jargon, no wallet complexity - just natural e-commerce.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🦊</div>
+                <h3>Invisible TDUST Payments</h3>
+                <p>AGI handles Lace wallet connectivity and TDUST transactions behind the scenes. Users never see blockchain complexity.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔐</div>
+                <h3>Zero-Knowledge Privacy</h3>
+                <p>Shipping addresses and purchase details protected with ZK proofs. Privacy-preserving without revealing sensitive data.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🌙</div>
+                <h3>Midnight Network</h3>
+                <p>Built on Midnight's privacy-first blockchain with real testnet TDUST integration and deployed smart contracts.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Seamless Integration</h3>
+                <p>Works with any e-commerce conversation. AGI abstracts all crypto complexity while maintaining security.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Real Transactions</h3>
+                <p>Processes actual TDUST payments on Midnight testnet. Not just demos - real blockchain transactions.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2 style="font-size: 36px; margin-bottom: 20px;">Experience the Future of Crypto Commerce</h2>
+        <p style="font-size: 18px; opacity: 0.8; margin-bottom: 40px;">See how AGI makes crypto payments invisible in a real shopping scenario</p>
+        <button class="demo-btn" onclick="showDemo()">🚀 Show Demo</button>
+    </div>
+    
+    <div class="tech-stack">
+        <h3>Powered By</h3>
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="icon">🤖</div>
+                <strong>ElizaOS</strong><br>
+                <small>AI Agent Framework</small>
+            </div>
+            <div class="tech-item">
+                <div class="icon">🌙</div>
+                <strong>Midnight.js</strong><br>
+                <small>Privacy Blockchain</small>
+            </div>
+            <div class="tech-item">
+                <div class="icon">🦊</div>
+                <strong>Lace Wallet</strong><br>
+                <small>TDUST Integration</small>
+            </div>
+            <div class="tech-item">
+                <div class="icon">🔐</div>
+                <strong>ZK Proofs</strong><br>
+                <small>Privacy Protection</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>AGI - Making crypto payments invisible since 2025 • Built for Midnight Network</p>
+    </div>
+
+    <script>
+        function showDemo() {
+            window.location.href = '/checkout.html';
+        }
+    </script>
+</body>
+</html>

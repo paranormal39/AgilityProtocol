@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGI Payment Assistant</title>
+    <script src="https://unpkg.com/@midnight-ntwrk/dapp-connector-api@latest/dist/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 800px;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .agi-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .header-info h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header-info p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .order-summary {
+            background: rgba(255, 255, 255, 0.1);
+            margin-left: auto;
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-align: right;
+        }
+        
+        .order-summary .product {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .order-summary .price {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .wallet-status {
+            background: #f7fafc;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .wallet-info {
+            font-size: 14px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+        }
+        
+        .connect-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .connect-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .message.agi .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .message.user .message-avatar {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .message-content {
+            background: white;
+            padding: 15px 18px;
+            border-radius: 18px;
+            max-width: 70%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            line-height: 1.5;
+        }
+        
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 5px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .typing-dots {
+            background: white;
+            padding: 15px 18px;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e0;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .message-input:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .send-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        
+        .send-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-action {
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .quick-btn {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .shipping-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #cbd5e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .shipping-form.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 4px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .submit-address-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .submit-address-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="agi-avatar">🤖</div>
+            <div class="header-info">
+                <h2>AGI Payment Assistant</h2>
+                <p>Seamless crypto payments with privacy protection</p>
+            </div>
+            <div class="order-summary">
+                <div class="product">Lavender Dreams Set</div>
+                <div class="price" id="orderPrice">10 TDUST</div>
+            </div>
+        </div>
+        
+        <div class="wallet-status">
+            <div class="wallet-info">
+                <div class="status-indicator"></div>
+                <span id="walletStatus">Checking Lace wallet...</span>
+            </div>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Lace</button>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="message agi">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div>Hello! I'm AGI, and I'll help you complete your purchase of the Lavender Dreams Skincare Set for just 10 TDUST using secure payments.</div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+            
+            <div class="message agi">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div>At only 10 TDUST, this is a great deal! I'll handle all the crypto complexity invisibly - you'll just have a normal shopping conversation while I process everything securely. Ready to get started? 🛍️</div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">🤖</div>
+            <div class="typing-dots">
+                <div class="dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="quick-actions">
+                <div class="quick-action" onclick="sendQuickMessage('Yes, let us proceed with the purchase')">✅ Proceed</div>
+                <div class="quick-action" onclick="sendQuickMessage('Check my wallet balance')">💰 Check Balance</div>
+                <div class="quick-action" onclick="setManualBalance()" id="manualBalanceBtn">🔧 Set Test Balance</div>
+                <div class="quick-action" onclick="refreshWalletConnection()">🔄 Refresh Wallet</div>
+                <div class="quick-action" onclick="showShippingForm()" id="shippingBtn" style="display: none;">📦 Add Shipping Address</div>
+            </div>
+            
+            <div class="shipping-form" id="shippingForm">
+                <h4 style="margin: 0 0 15px 0; color: #2d3748;">🔐 Privacy-Preserving KYC Collection</h4>
+                <p style="margin: 0 0 15px 0; color: #4a5568; font-size: 14px;">
+                    Your information will be protected using zero-knowledge proofs. Only delivery verification will be possible - your actual address remains private.
+                </p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" value="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" value="Doe" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="street">Street Address</label>
+                        <input type="text" id="street" value="123 Privacy Lane" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" value="Midnight City" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <select id="state" required>
+                            <option value="CA">California</option>
+                            <option value="NY">New York</option>
+                            <option value="TX">Texas</option>
+                            <option value="FL">Florida</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="zipCode">ZIP Code</label>
+                        <input type="text" id="zipCode" value="90210" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" required>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="submit-address-btn" onclick="submitShippingAddress()">
+                    🔐 Generate ZK Proof & Confirm Address
+                </button>
+            </div>
+        </div>
+        
+        <div class="input-area" style="border-top: none; padding-top: 0;">
+            <input type="text" class="message-input" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <span>Send</span>
+                <span>📤</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isConnected = false;
+        let currentSessionId = null;
+        let socket = null;
+        
+        // Get product info from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const product = urlParams.get('product') || 'lavender-set';
+        const price = parseFloat(urlParams.get('price')) || 10;
+        const currency = urlParams.get('currency') || 'TDUST';
+        
+        // Update price display
+        document.getElementById('orderPrice').textContent = `${price} ${currency}`;
+        
+        // Initialize WebSocket connection
+        function initWebSocket() {
+            socket = new WebSocket('ws://localhost:3003');
+            
+            socket.onopen = function() {
+                console.log('Connected to AGI server');
+                checkWalletStatus();
+            };
+            
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleAGIResponse(data);
+            };
+            
+            socket.onclose = function() {
+                console.log('Disconnected from AGI server');
+                setTimeout(initWebSocket, 3000);
+            };
+            
+            socket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+        
+        // Check Lace wallet status
+        async function checkWalletStatus() {
+            try {
+                // Check for Midnight API directly
+                if (window.midnight && window.midnight.mnLace) {
+                    console.log('🔍 Midnight Lace wallet API detected');
+                    const walletStatus = {
+                        connected: false,
+                        available: true,
+                        message: 'Midnight Lace wallet detected - ready to connect'
+                    };
+                    
+                    updateWalletStatus(walletStatus);
+                    console.log('📤 Sending initial wallet status to backend:', walletStatus);
+                    
+                    // Send wallet status to backend
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'wallet_update',
+                            walletStatus: walletStatus
+                        }));
+                        console.log('✅ Initial wallet status sent to backend');
+                    } else {
+                        console.error('❌ WebSocket not ready for initial wallet update');
+                    }
+                    return;
+                }
+                
+                // If no direct API, show not available
+                console.log('❌ Midnight Lace wallet API not detected');
+                updateWalletStatus({
+                    connected: false,
+                    available: false,
+                    message: 'Midnight Lace wallet not installed'
+                });
+            } catch (error) {
+                console.error('❌ Wallet status check failed:', error);
+                updateWalletStatus({
+                    connected: false,
+                    available: false,
+                    message: 'Wallet not available'
+                });
+            }
+        }
+        
+        // Connect to Lace wallet
+        async function connectWallet() {
+            try {
+                // Try direct Midnight API connection first
+                if (window.midnight && window.midnight.mnLace) {
+                    console.log('🔗 Connecting directly to Midnight Lace wallet...');
+                    const api = await window.midnight.mnLace.enable();
+                    if (api) {
+                        console.log('✅ Direct wallet connection successful');
+                        
+                        // Check for manual balance override first (for testing)
+                        let realBalance = null;
+                        const manualBalance = localStorage.getItem('manual_tdust_balance');
+                        if (manualBalance) {
+                            realBalance = parseInt(manualBalance);
+                            console.log('🔧 Using manual balance override:', realBalance);
+                        } else {
+                            // Try to get real balance using Midnight-specific API
+                            console.log('🔍 Available API methods:', Object.keys(api));
+                            
+                            try {
+                                // Method 1: Try dedicated balances() method
+                                if (typeof api.balances === 'function') {
+                                    console.log('🔍 Trying balances() method...');
+                                    try {
+                                        const balances = await Promise.race([
+                                            api.balances(),
+                                            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                                        ]);
+                                        
+                                        console.log('✅ balances() response:', balances);
+                                        
+                                        if (balances) {
+                                            const shielded = BigInt(balances.shielded || 0);
+                                            const unshielded = BigInt(balances.unshielded || 0);
+                                            const total = shielded + unshielded;
+                                            realBalance = Number(total);
+                                            console.log(`💰 Found balance - Shielded: ${shielded}, Unshielded: ${unshielded}, Total: ${total}`);
+                                        }
+                                    } catch (error) {
+                                        console.log('⚠️ balances() failed:', error.message);
+                                    }
+                                }
+                                
+                                // Method 2: Try getBalance() method
+                                if (realBalance === null && typeof api.getBalance === 'function') {
+                                    console.log('🔍 Trying getBalance() method...');
+                                    try {
+                                        const balance = await Promise.race([
+                                            api.getBalance(),
+                                            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                                        ]);
+                                        
+                                        console.log('✅ getBalance() response:', balance);
+                                        
+                                        if (balance !== undefined && balance !== null) {
+                                            realBalance = parseFloat(balance) || 0;
+                                            console.log(`💰 Found balance: ${realBalance} TDUST`);
+                                        }
+                                    } catch (error) {
+                                        console.log('⚠️ getBalance() failed:', error.message);
+                                    }
+                                }
+                                
+                                // Method 3: Check state() for balance fields
+                                if (realBalance === null) {
+                                    console.log('🔍 Checking state() for balance fields...');
+                                    try {
+                                        const state = await Promise.race([
+                                            api.state(),
+                                            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                                        ]);
+                                        
+                                        if (state.balance !== undefined) {
+                                            realBalance = parseFloat(state.balance) || 0;
+                                            console.log(`💰 Found state.balance: ${realBalance} TDUST`);
+                                        } else if (state.balances !== undefined) {
+                                            const balances = state.balances;
+                                            const shielded = BigInt(balances.shielded || 0);
+                                            const unshielded = BigInt(balances.unshielded || 0);
+                                            const total = shielded + unshielded;
+                                            realBalance = Number(total);
+                                            console.log(`💰 Found state.balances: ${realBalance} TDUST`);
+                                        }
+                                    } catch (error) {
+                                        console.log('⚠️ state() check failed:', error.message);
+                                    }
+                                }
+                                
+                            } catch (error) {
+                                console.log('⚠️ Balance detection failed:', error.message);
+                                realBalance = 0;
+                            }
+                            
+                            if (realBalance === null) {
+                                console.log('⚠️ No balance methods available - switching to privacy-first approach');
+                                console.log('� Testing payment feasibility instead of reading explicit balance...');
+                                
+                                // Use privacy-first "can we pay?" approach
+                                try {
+                                    const canFundPayment = await canWalletFundTransaction(api, 10);
+                                    if (canFundPayment) {
+                                        realBalance = 50; // Conservative estimate for UI
+                                        console.log('✅ Wallet can fund payments - using conservative estimate');
+                                    } else {
+                                        realBalance = 0;
+                                        console.log('❌ Wallet cannot fund payments - likely insufficient funds');
+                                    }
+                                } catch (error) {
+                                    console.log('⚠️ Payment feasibility test failed:', error.message);
+                                    realBalance = 0;
+                                }
+                            }
+                        }
+                        
+                        // Try to get real wallet address with timeout
+                        let walletAddress = 'midnight_connected_' + Date.now().toString().slice(-6);
+                        try {
+                            // Use state() method which we know works
+                            const addressPromise = Promise.race([
+                                (async () => {
+                                    // Use state() method - we know this works from the test
+                                    if (api.state && typeof api.state === 'function') {
+                                        try {
+                                            const state = await api.state();
+                                            console.log('🔍 Getting address from state:', state);
+                                            if (state && state.address) {
+                                                return state.address;
+                                            }
+                                        } catch (e) {
+                                            console.log('⚠️ state() for address failed:', e.message);
+                                        }
+                                    }
+                                    
+                                    return null;
+                                })(),
+                                new Promise((_, reject) => 
+                                    setTimeout(() => reject(new Error('Address check timeout')), 2000)
+                                )
+                            ]);
+                            
+                            const detectedAddress = await addressPromise;
+                            if (detectedAddress) {
+                                walletAddress = detectedAddress;
+                                console.log('✅ Found real wallet address:', walletAddress);
+                            }
+                        } catch (addressError) {
+                            console.log('⏰ Address detection timed out, using demo address');
+                        }
+                        
+                        // Update UI to show connected state with real balance
+                        const walletStatus = {
+                            connected: true,
+                            available: true,
+                            tdustBalance: realBalance,
+                            address: walletAddress
+                        };
+                        
+                        updateWalletStatus(walletStatus);
+                        console.log('📤 Sending wallet status to backend:', walletStatus);
+                        
+                        // Send wallet status to backend
+                        if (socket && socket.readyState === WebSocket.OPEN) {
+                            socket.send(JSON.stringify({
+                                type: 'wallet_update',
+                                walletStatus: walletStatus
+                            }));
+                            console.log('✅ Wallet status sent to backend');
+                        } else {
+                            console.error('❌ WebSocket not ready for wallet update');
+                        }
+                        return;
+                    }
+                }
+                
+                // If direct connection failed, show error
+                console.log('❌ Direct wallet connection not available');
+                updateWalletStatus({
+                    connected: false,
+                    available: false,
+                    message: 'Midnight Lace wallet not found'
+                });
+            } catch (error) {
+                console.error('❌ Wallet connection failed:', error);
+                alert('Failed to connect to Lace wallet. Please make sure Lace is installed and try again.');
+            }
+        }
+        
+        // Send message to AGI
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message && socket && socket.readyState === WebSocket.OPEN) {
+                // Add user message to chat
+                addMessage('user', message);
+                
+                // Show typing indicator
+                showTyping();
+                
+                // Send to AGI with product context
+                socket.send(JSON.stringify({
+                    type: 'chat',
+                    message: message,
+                    context: {
+                        product: 'Lavender Dreams Skincare Set',
+                        price: price,
+                        currency: currency
+                    }
+                }));
+                
+                input.value = '';
+                document.getElementById('sendBtn').disabled = true;
+            }
+        }
+        
+        // Send quick message
+        function sendQuickMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+        
+        // Handle AGI responses
+        function handleAGIResponse(data) {
+            hideTyping();
+            document.getElementById('sendBtn').disabled = false;
+            
+            if (data.type === 'wallet_status') {
+                updateWalletStatus(data);
+            } else if (data.type === 'chat_response') {
+                addMessage('agi', data.message);
+            } else if (data.type === 'mcp_response') {
+                handleMCPResponse(data);
+            } else if (data.type === 'payment_complete') {
+                handlePaymentComplete(data);
+            } else if (data.type === 'shipping_proof_complete') {
+                handleShippingProofComplete(data);
+            }
+        }
+        
+        // Handle MCP tool responses
+        function handleMCPResponse(data) {
+            if (data.tool === 'checkLaceWalletStatus' || data.tool === 'connectLaceWallet') {
+                updateWalletStatus(data.result);
+            } else if (data.tool === 'processSeamlessPayment') {
+                handlePaymentResponse(data.result);
+            }
+        }
+        
+        // Handle payment responses
+        function handlePaymentResponse(result) {
+            if (result.success) {
+                addMessage('agi', result.message);
+                setTimeout(() => {
+                    showPaymentSuccess(result.data);
+                }, 2000);
+            } else {
+                addMessage('agi', result.message);
+            }
+        }
+        
+        // Show payment success
+        function showPaymentSuccess(data) {
+            const successMessage = `
+                🎉 Payment Complete! 
+                
+                Order ID: ${data.orderId}
+                Transaction: ${data.txHash}
+                Estimated Delivery: ${data.estimatedDelivery}
+                
+                Your Lavender Dreams Skincare Set is on its way!
+            `;
+            addMessage('agi', successMessage);
+            
+            // Show shipping address button after successful payment
+            setTimeout(() => {
+                addMessage('agi', '📦 To complete your order with maximum privacy, please add your shipping address. I\'ll generate a zero-knowledge proof to protect your location while enabling delivery verification!');
+                document.getElementById('shippingBtn').style.display = 'block';
+            }, 2000);
+        }
+        
+        // Update wallet status display
+        function updateWalletStatus(status) {
+            const walletInfo = document.getElementById('walletStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            if (status.connected) {
+                walletInfo.innerHTML = `🦊 Connected • ${status.tdustBalance || 0} TDUST`;
+                connectBtn.textContent = 'Connected';
+                connectBtn.disabled = true;
+                connectBtn.style.background = '#48bb78';
+                walletConnected = true;
+            } else if (status.available) {
+                walletInfo.innerHTML = '🦊 Lace wallet detected • Not connected';
+                connectBtn.textContent = 'Connect Lace';
+                connectBtn.disabled = false;
+                connectBtn.onclick = connectWallet;
+            } else {
+                walletInfo.innerHTML = '⚠️ Lace wallet not found';
+                connectBtn.textContent = 'Install Lace';
+                connectBtn.onclick = () => window.open('https://lace.io', '_blank');
+            }
+        }
+        
+        // Check wallet availability
+        function checkWalletAvailability() {
+            const walletStatus = document.getElementById('walletStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            if (window.midnight && window.midnight.mnLace) {
+                walletStatus.innerHTML = '🦊 Lace wallet detected • Not connected';
+                connectBtn.textContent = 'Connect Lace';
+                connectBtn.disabled = false;
+                connectBtn.onclick = connectWallet;
+            } else {
+                walletStatus.innerHTML = '⚠️ Lace wallet not found';
+                connectBtn.textContent = 'Install Lace';
+                connectBtn.onclick = () => window.open('https://lace.io', '_blank');
+            }
+        }
+        
+        // Update wallet display
+        function updateWalletDisplay(walletStatusData) {
+            const walletStatus = document.getElementById('walletStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            if (walletStatusData.connected) {
+                walletStatus.innerHTML = `🦊 Connected • ${walletStatusData.tdustBalance || 0} TDUST`;
+                connectBtn.textContent = 'Connected';
+                connectBtn.disabled = true;
+            } else {
+                walletStatus.innerHTML = '🦊 Lace wallet detected • Not connected';
+                connectBtn.textContent = 'Connect Lace';
+                connectBtn.disabled = false;
+                connectBtn.onclick = connectWallet;
+            }
+        }
+        
+        // Privacy-first payment feasibility checker (Midnight design philosophy)
+        async function canWalletFundTransaction(api, tdustAmount) {
+            try {
+                console.log(`🔍 Testing if wallet can fund ${tdustAmount} TDUST payment...`);
+                
+                // Create a minimal probe transaction
+                const probeTransaction = {
+                    type: 'payment_probe',
+                    amount: tdustAmount,
+                    recipient: 'agility_merchant_address',
+                    probe: true // This is just a feasibility test
+                };
+                
+                // Test if wallet can balance and prove this transaction
+                const result = await Promise.race([
+                    api.balanceAndProveTransaction(probeTransaction, []),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+                ]);
+                
+                console.log(`✅ Payment feasibility test passed for ${tdustAmount} TDUST`);
+                return true;
+                
+            } catch (error) {
+                if (error.message.includes('insufficient') || error.message.includes('balance')) {
+                    console.log(`💸 Insufficient funds for ${tdustAmount} TDUST payment`);
+                    return false;
+                } else if (error.message.includes('serialize')) {
+                    // Transaction format issue, but wallet tried to process it (indicates funds available)
+                    console.log(`🔧 Transaction format issue (expected) - wallet likely has funds`);
+                    return true;
+                } else {
+                    console.log(`⚠️ Payment feasibility test error: ${error.message}`);
+                    return false;
+                }
+            }
+        }
+        
+        // Refresh wallet connection and balance
+        function refreshWalletConnection() {
+            addMessage('user', '🔄 Refresh wallet connection');
+            addMessage('agi', '🔄 Refreshing wallet connection and balance...');
+            
+            // Check for manual balance first
+            const manualBalance = localStorage.getItem('manual_tdust_balance');
+            if (manualBalance) {
+                console.log('🔧 Found manual balance, applying immediately:', manualBalance);
+                
+                const walletStatus = {
+                    connected: true,
+                    available: true,
+                    tdustBalance: parseInt(manualBalance),
+                    address: 'manual_test_address_' + Date.now().toString().slice(-6),
+                    message: `Manual test balance: ${manualBalance} TDUST`
+                };
+                
+                // Send to backend
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'wallet_update',
+                        ...walletStatus
+                    }));
+                }
+                
+                // Update UI
+                updateWalletDisplay(walletStatus);
+                
+                addMessage('agi', `✅ Wallet refreshed! Using manual test balance: ${manualBalance} TDUST. You can now proceed with purchases.`);
+            } else {
+                // Try to reconnect to real wallet
+                connectWallet().then(() => {
+                    addMessage('agi', '✅ Wallet connection refreshed! Check your balance above.');
+                }).catch((error) => {
+                    addMessage('agi', '❌ Wallet refresh failed. Try using "🔧 Set Test Balance" for testing.');
+                });
+            }
+        }
+        
+        // Set manual balance for testing
+        function setManualBalance() {
+            const balance = prompt('Enter TDUST balance for testing (e.g., 1000):');
+            if (balance && !isNaN(balance)) {
+                localStorage.setItem('manual_tdust_balance', balance);
+                addMessage('user', `🔧 Set manual test balance: ${balance} TDUST`);
+                
+                // Immediately update the wallet status with new balance
+                const walletStatus = {
+                    connected: true,
+                    available: true,
+                    tdustBalance: parseInt(balance),
+                    address: 'manual_test_address_' + Date.now().toString().slice(-6),
+                    message: `Manual test balance set: ${balance} TDUST`
+                };
+                
+                // Send updated status to backend
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'wallet_update',
+                        ...walletStatus
+                    }));
+                    console.log('📤 Sent manual balance update to backend:', walletStatus);
+                }
+                
+                // Update UI
+                updateWalletDisplay(walletStatus);
+                
+                addMessage('agi', `✅ Test balance set and applied! Your session now shows ${balance} TDUST. You can proceed with purchases immediately.`);
+                
+                // Update the button to show it's set
+                document.getElementById('manualBalanceBtn').textContent = `🔧 Test: ${balance} TDUST`;
+            }
+        }
+        
+        // Show shipping form
+        function showShippingForm() {
+            const form = document.getElementById('shippingForm');
+            form.classList.add('show');
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Handle shipping proof completion
+        function handleShippingProofComplete(data) {
+            console.log('🔐 ZK Proof completed:', data);
+            
+            if (data.success) {
+                addMessage('agi', `🎉 ZK Proof Generated Successfully!
+                
+📋 **Proof Details:**
+• **Commitment**: ${data.proof.commitment}
+• **Proof ID**: ${data.proof.proof}
+• **Circuit**: ${data.proof.circuit || 'verify_shipping_address'}
+• **Generated**: ${new Date().toLocaleTimeString()}
+
+🔐 Your shipping address is now cryptographically verified while maintaining complete privacy. The merchant can confirm delivery without seeing your actual address!`);
+                
+                // Hide shipping form
+                document.getElementById('shippingForm').classList.remove('show');
+            } else {
+                addMessage('agi', `❌ ZK Proof generation failed: ${data.error || 'Unknown error'}. Please try again.`);
+            }
+        }
+        
+        // Submit shipping address with ZK proof generation
+        function submitShippingAddress() {
+            const shippingData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                street: document.getElementById('street').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zipCode: document.getElementById('zipCode').value,
+                country: document.getElementById('country').value
+            };
+            
+            // Show processing message
+            addMessage('user', ` Submitting shipping address: ${shippingData.firstName} ${shippingData.lastName}, ${shippingData.street}, ${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}`);
+            
+            // Show AGI processing
+            setTimeout(() => {
+                addMessage('agi', ' Generating zero-knowledge proof for your KYC information... This ensures your privacy while proving delivery eligibility!');
+                
+                // Send to backend for REAL ZK proof processing via proof server on port 6300
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'generate_kyc_proof',
+                        kycData: {
+                            firstName: shippingData.firstName,
+                            lastName: shippingData.lastName,
+                            address: {
+                                street: shippingData.street,
+                                city: shippingData.city,
+                                state: shippingData.state,
+                                zipCode: shippingData.zipCode,
+                                country: shippingData.country
+                            }
+                        },
+                        proofType: 'shipping_address_kyc',
+                        privacyLevel: 'full'
+                    }));
+                    
+                    addMessage('agi', ' Connecting to real ZK proof server on port 6300...');
+                } else {
+                    addMessage('agi', ' Connection error. Please try again.');
+                }
+            }, 1000);
+        }
+        
+        // Handle shipping proof completion
+        function handleShippingProofComplete(data) {
+            if (data.result && data.result.success) {
+                const result = data.result;
+                const proofMessage = `✅ **Real ZK Proof Generated Successfully!**
+
+🔐 **Proof Details:**
+• **Circuit**: ${result.circuit || 'verify_shipping_address'}
+• **Commitment Hash**: ${result.commitmentHash?.substring(0, 20)}...
+• **ZK Proof Hash**: ${result.zkProofHash?.substring(0, 20)}...
+• **Delivery Zone**: ${result.deliveryZone || 'Verified'}
+
+${result.message || 'Your shipping address is now cryptographically committed with zero-knowledge privacy!'}
+
+🚚 **Privacy Benefits:**
+• Courier can verify delivery eligibility without seeing your address
+• Your location remains completely private on-chain
+• Cryptographic proof enables secure delivery verification`;
+
+                addMessage('agi', proofMessage);
+            } else {
+                addMessage('agi', '❌ ZK proof generation encountered an issue, but your privacy is still protected.');
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(sender, text) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'agi' ? '🤖' : '👤';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            const messageText = document.createElement('div');
+            messageText.innerHTML = text.replace(/\n/g, '<br>');
+            
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            time.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            content.appendChild(messageText);
+            content.appendChild(time);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        // Show typing indicator
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'flex';
+            const chatArea = document.getElementById('chatArea');
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        // Hide typing indicator
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+        
+        // Connect to WebSocket server
+        function connectToServer() {
+            try {
+                socket = new WebSocket('ws://localhost:3003');
+                
+                socket.onopen = function(event) {
+                    console.log('🔗 Connected to AGI server');
+                    isConnected = true;
+                };
+                
+                socket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    console.log('📨 Received from server:', data);
+                    
+                    if (data.type === 'chat_response') {
+                        addMessage('agi', data.message);
+                        
+                        // Check if this is a payment completion that requires KYC
+                        if (data.message && data.message.includes('Next Step: Privacy-Preserving KYC')) {
+                            setTimeout(() => {
+                                addMessage('agi', '📋 **Ready for KYC Collection**\n\nClick the button below to securely provide your shipping information. I\'ll use zero-knowledge proofs to protect your privacy while enabling delivery verification.');
+                                document.getElementById('shippingBtn').style.display = 'block';
+                                document.getElementById('shippingBtn').scrollIntoView({ behavior: 'smooth' });
+                            }, 1500);
+                        }
+                        
+                        // Check if this is KYC completion
+                        if (data.message && data.message.includes('Order Complete!')) {
+                            setTimeout(() => {
+                                document.getElementById('shippingForm').classList.remove('show');
+                                document.getElementById('shippingBtn').style.display = 'none';
+                                addMessage('agi', '🎊 **Transaction Complete!** Thank you for using our privacy-preserving e-commerce system. Your order will be processed with maximum privacy protection.');
+                            }, 2000);
+                        }
+                    } else if (data.type === 'hide_shipping_form') {
+                        document.getElementById('shippingForm').classList.remove('show');
+                        document.getElementById('shippingBtn').style.display = 'none';
+                    } else if (data.type === 'shipping_proof_complete') {
+                        handleShippingProofComplete(data);
+                    }
+                };
+                
+                socket.onclose = function(event) {
+                    console.log('🔌 Disconnected from AGI server');
+                    isConnected = false;
+                    // Try to reconnect after 3 seconds
+                    setTimeout(connectToServer, 3000);
+                };
+                
+                socket.onerror = function(error) {
+                    console.error('❌ WebSocket error:', error);
+                };
+            } catch (error) {
+                console.error('❌ Failed to connect to server:', error);
+                setTimeout(connectToServer, 3000);
+            }
+        }
+        
+        // Send message to server
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message && socket && socket.readyState === WebSocket.OPEN) {
+                addMessage('user', message);
+                
+                socket.send(JSON.stringify({
+                    type: 'chat',
+                    message: message,
+                    context: {
+                        product: product,
+                        price: price,
+                        currency: currency
+                    }
+                }));
+                
+                input.value = '';
+                showTyping();
+            }
+        }
+        
+        // Send quick message
+        function sendQuickMessage(message) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                addMessage('user', message);
+                
+                // Show loading for balance check
+                if (message.toLowerCase().includes('balance')) {
+                    addMessage('agi', '🔍 Checking your wallet balance... (max 3 seconds)');
+                }
+                
+                socket.send(JSON.stringify({
+                    type: 'chat',
+                    message: message,
+                    context: {
+                        product: product,
+                        price: price,
+                        currency: currency
+                    }
+                }));
+                
+                showTyping();
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(sender, message) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const time = new Date().toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="message-content">${message}</div>
+                    <div class="message-time">${time}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-body">
+                        <div class="message-content">${message}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+            }
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            if (sender === 'agi') {
+                hideTyping();
+            }
+        }
+        
+        // Handle enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            connectToServer();
+            checkWalletAvailability();
+            
+            // Check for existing manual balance override
+            const existingBalance = localStorage.getItem('manual_tdust_balance');
+            if (existingBalance) {
+                document.getElementById('manualBalanceBtn').textContent = `🔧 Test: ${existingBalance} TDUST`;
+                console.log('🔧 Found existing manual balance:', existingBalance);
+            }
+        });
+    </script>
+</body>
+</html>

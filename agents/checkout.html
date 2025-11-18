@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Lavender Dreams Skincare Set</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            padding: 40px;
+        }
+        
+        .product-section {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #e8d5ff 0%, #f0e6ff 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+        
+        .product-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .product-description {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .product-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .product-features li {
+            padding: 8px 0;
+            color: #4a5568;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .product-features li:before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+        
+        .price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .original-price {
+            font-size: 20px;
+            color: #a0aec0;
+            text-decoration: line-through;
+            margin-right: 10px;
+        }
+        
+        .payment-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        
+        .payment-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .payment-option {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .payment-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .payment-icon {
+            font-size: 32px;
+            width: 50px;
+            text-align: center;
+        }
+        
+        .payment-info {
+            flex: 1;
+        }
+        
+        .payment-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .payment-desc {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .agi-option {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .agi-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .agi-option .payment-name,
+        .agi-option .payment-desc {
+            color: white;
+        }
+        
+        .order-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 18px;
+            color: #667eea;
+        }
+        
+        .back-btn {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .checkout-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Checkout</h1>
+            <p>Complete your purchase with your preferred payment method</p>
+        </div>
+        
+        <div class="checkout-content">
+            <div class="product-section">
+                <div class="product-card">
+                    <div class="product-image">🌸</div>
+                    <div class="product-title">Lavender Dreams Skincare Set</div>
+                    <div class="product-description">
+                        Indulge in the ultimate relaxation experience with our premium lavender skincare collection. 
+                        This luxurious set combines the soothing properties of organic lavender with nourishing botanicals 
+                        for a spa-like experience at home.
+                    </div>
+                    <ul class="product-features">
+                        <li>Organic Lavender Body Wash (250ml)</li>
+                        <li>Lavender & Shea Butter Moisturizer (200ml)</li>
+                        <li>Pure Lavender Essential Oil (15ml)</li>
+                        <li>Lavender Bath Salts (300g)</li>
+                        <li>Bamboo Gift Box Packaging</li>
+                        <li>Free shipping worldwide</li>
+                    </ul>
+                    <div class="price">
+                        <span class="original-price">100 TDUST</span>
+                        10 TDUST
+                    </div>
+                    <small style="color: #718096;">Limited time offer - Save 90 TDUST!</small>
+                </div>
+                
+                <button class="back-btn" onclick="goBack()">← Back to Landing Page</button>
+            </div>
+            
+            <div class="payment-section">
+                <div class="payment-title">Choose Payment Method</div>
+                
+                <div class="payment-options">
+                    <div class="payment-option" onclick="selectPayment('paypal')">
+                        <div class="payment-icon">💳</div>
+                        <div class="payment-info">
+                            <div class="payment-name">PayPal</div>
+                            <div class="payment-desc">Pay securely with your PayPal account</div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option" onclick="selectPayment('apple')">
+                        <div class="payment-icon">🍎</div>
+                        <div class="payment-info">
+                            <div class="payment-name">Apple Pay</div>
+                            <div class="payment-desc">Quick and secure payment with Touch ID</div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-option agi-option" onclick="selectPayment('agi')">
+                        <div class="payment-icon">🤖</div>
+                        <div class="payment-info">
+                            <div class="payment-name">AGI Assistant</div>
+                            <div class="payment-desc">Seamless crypto payment via Lace wallet with privacy protection</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>10 TDUST</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Network Fee:</span>
+                        <span>0 TDUST</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Total:</span>
+                        <span>10 TDUST</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectPayment(method) {
+            if (method === 'agi') {
+                // Redirect to AGI chat interface
+                window.location.href = '/agi-chat.html?product=lavender-set&price=10&currency=TDUST';
+            } else if (method === 'paypal') {
+                alert('PayPal integration would be implemented here. For this demo, please try the AGI Assistant! 🤖');
+            } else if (method === 'apple') {
+                alert('Apple Pay integration would be implemented here. For this demo, please try the AGI Assistant! 🤖');
+            }
+        }
+        
+        function goBack() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

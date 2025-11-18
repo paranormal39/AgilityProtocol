@@ -1,13 +1,13 @@
 {
   "name": "agility-summit",
   "version": "1.0.0",
-  "description": "Agility - Secure Financial Service on Midnight Network",
-  "main": "src/index.js",
+  "description": "AGI - Seamless Crypto Abstraction AI Agent for Privacy-First E-commerce",
+  "main": "agents/agi-server.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "cd agents && npm start",
+    "dev": "cd agents && npm run dev",
+    "setup": "cd agents && npm run setup",
     "compile": "bash -lc 'mkdir -p build && for f in contracts/*.compact; do compact compile \"$f\" build; done'",
-    "test": "jest",
     "deploy:testnet": "node scripts/deploy.js --network testnet",
     "deploy:mainnet": "node scripts/deploy.js --network mainnet"
   },

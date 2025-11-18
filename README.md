@@ -1,53 +1,43 @@
-# Agility
+# AGI - Seamless Crypto Abstraction AI Agent
 
-A pioneering financial service designed to revolutionize the security and efficiency of digital transactions using the Midnight Network.
+An AI agent that makes crypto payments invisible to users - they shop normally while AGI handles all blockchain complexity behind the scenes using Midnight Network and DUST tokens.
 
-## 🌟 Overview
+## 🤖 What AGI Does
 
-Agility leverages the power of:
-- **Midnight Network** - Zero-knowledge proofs for privacy
-- **XRP Ledger (XRPL)** - Fast, efficient transactions
-- **Interledger Protocol (ILP)** - Cross-chain interoperability
-- **AI/ML with MCP & LLMs** - Intelligent payment processing and customer experience
-- **Compact Language** - Privacy-preserving smart contracts
+AGI makes crypto payments completely invisible:
+- **Normal Shopping Experience**: Users have regular conversations about products
+- **Invisible DUST Payments**: AGI handles Lace wallet connectivity and DUST transactions behind the scenes
+- **Zero-Knowledge Privacy**: Shipping addresses and purchase details protected with ZK proofs
+- **No Crypto Jargon**: Users never hear about "blockchain", "tokens", or "transactions"
+- **Seamless Integration**: Works with any e-commerce conversation
 
-## 🚀 Features
+## 🌟 Key Features
 
-- **Privacy-First Transactions**: Using Midnight's Zero Knowledge Proofs
-- **Cross-Chain Payments**: Seamless transactions across different blockchains
-- **Secure Escrow System**: Protected payment processing
-- **KYC Compliance**: Privacy-preserving identity verification
-- **AI-Powered Integration**: MCP-based seamless embedding into customer websites with LLM support
+- **Conversational Commerce**: Natural language shopping with invisible crypto payments
+- **Lace Wallet Integration**: Automatic DUST token handling via Lace wallet
+- **ZK Privacy Proofs**: Shipping and purchase privacy without revealing details
+- **Midnight.js Integration**: Production-ready blockchain operations
+- **Privacy-KYC Contract**: Deployed smart contract for compliance
 
-## 🎯 Use Cases
+## 🎯 Example Conversation
 
-Agility provides privacy-preserving payment solutions for:
+```
+User: "I'm looking for some skincare products"
+AGI: "Great! I have some wonderful options. What type are you interested in? 🌸"
 
-### E-Commerce & Retail
-- **Keda's Brew Example**: Natural skincare store with crypto payments, loyalty program, and subscriptions
-- Private purchase history with Zero-Knowledge Proofs
-- Customer data encrypted client-side, never exposed on blockchain
-- See [KEDAS_BREW_INTEGRATION_PLAN.md](./KEDAS_BREW_INTEGRATION_PLAN.md) for complete implementation
+User: "Something with lavender"
+AGI: "Perfect! Our lavender bundle is very popular - it's $45 and includes soap, lotion, and essential oil."
 
-### Small Business Solutions
-- Payment invoicing and tracking
-- Subscription management (monthly, quarterly, annual)
-- Loyalty rewards programs
-- Bundle deals and promotions
+User: "That sounds good, I'll take it"
+AGI: "Excellent choice! Let me process your secure payment..."
+     [Invisibly: connects Lace wallet, converts USD→DUST, generates ZK proofs]
+AGI: "Payment complete! 🎉 Your lavender bundle will arrive Tuesday. Order #abc123"
 
-### Enterprise Features
-- Multi-signature payment authorization
-- Supply chain payment tracking
-- Payroll and contractor payments
-- Marketplace transaction fees
+User: "Thanks!"
+AGI: "You're welcome! You'll get tracking info via email. Enjoy your lavender products! 💜"
+```
 
-### Advanced Applications
-- Crowdfunding campaigns
-- Insurance premium and claims
-- Rental/lease payments
-- AI/ML service usage billing
-
-**See [SMART_CONTRACT_IDEAS.md](./SMART_CONTRACT_IDEAS.md) for 15 detailed use cases with implementation guides.**
+**User never knew they used crypto - AGI handled everything invisibly!**
 
 ## ⚡ Quick Start
 
@@ -56,13 +46,15 @@ Agility provides privacy-preserving payment solutions for:
 git clone https://github.com/Island-Ghost/Agility-Summit.git
 cd Agility-Summit
 
-# Install dependencies
+# Install dependencies for AGI agent
+cd agents
 npm install
 
 # Set up environment
 cp .env.example .env
+# Add your OPENAI_API_KEY and MIDNIGHT_WALLET_SEED
 
-# Start the application
+# Start AGI agent
 npm start
 ```
 
