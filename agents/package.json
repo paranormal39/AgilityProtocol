@@ -6,7 +6,12 @@
   "main": "agi-server.js",
   "scripts": {
     "start": "node agi-server.js",
-    "dev": "node --watch agi-server.js",
+    "agent": "node node_modules/@elizaos/server/dist/index.js --character=./character.json",
+    "dev": "nodemon agi-server.js",
+    "build:zk": "tsc",
+    "build:zk:watch": "tsc --watch",
+    "setup:zk": "npm run build:zk && echo 'ZK modules compiled successfully'",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "setup": "./setup-agent.sh",
     "demo": "npm start"
   },
@@ -23,14 +28,24 @@
   "author": "Agility Summit Team",
   "license": "Apache-2.0",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "ws": "^8.14.2",
     "@elizaos/core": "^0.1.7",
-    "@elizaos/plugin-node": "^0.1.7"
+    "@elizaos/plugin-node": "^0.1.7",
+    "@elizaos/server": "^1.6.4",
+    "@fleek-platform/eliza-plugin-mcp": "^0.0.8",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2",
+    "qrcode": "^1.5.4",
+    "ws": "^8.14.2",
+    "xrpl": "^4.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "@elizaos/cli": "^1.6.4",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "nodemon": "^3.0.2",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0"

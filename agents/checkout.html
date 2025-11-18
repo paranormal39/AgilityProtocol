@@ -302,27 +302,27 @@
                         <div class="payment-icon">🤖</div>
                         <div class="payment-info">
                             <div class="payment-name">AGI Assistant</div>
-                            <div class="payment-desc">Seamless crypto payment via Lace wallet with privacy protection</div>
+                            <div class="payment-desc">Choose between tDUST (Midnight) or testXRP (XRPL) with privacy protection</div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="order-summary">
                     <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span>10 TDUST</span>
+                        <span>Payment Options:</span>
+                        <span>tDUST or testXRP</span>
                     </div>
                     <div class="summary-row">
-                        <span>Shipping:</span>
-                        <span>FREE</span>
+                        <span>Privacy:</span>
+                        <span>ZK Proofs</span>
                     </div>
                     <div class="summary-row">
-                        <span>Network Fee:</span>
-                        <span>0 TDUST</span>
+                        <span>Network:</span>
+                        <span>Midnight/XRPL</span>
                     </div>
                     <div class="summary-row">
-                        <span>Total:</span>
-                        <span>10 TDUST</span>
+                        <span>KYC:</span>
+                        <span>Privacy-Preserving</span>
                     </div>
                 </div>
             </div>
@@ -333,7 +333,7 @@
         function selectPayment(method) {
             if (method === 'agi') {
                 // Redirect to AGI chat interface
-                window.location.href = '/agi-chat.html?product=lavender-set&price=10&currency=TDUST';
+                window.location.href = '/agi-chat.html';
             } else if (method === 'paypal') {
                 alert('PayPal integration would be implemented here. For this demo, please try the AGI Assistant! 🤖');
             } else if (method === 'apple') {

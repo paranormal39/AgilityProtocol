@@ -380,8 +380,8 @@
                 <p>Seamless crypto payments with privacy protection</p>
             </div>
             <div class="order-summary">
-                <div class="product">Lavender Dreams Set</div>
-                <div class="price" id="orderPrice">10 TDUST</div>
+                <div class="product">Agility Summit Products</div>
+                <div class="price" id="orderPrice">Multiple Payment Options</div>
             </div>
         </div>
         
@@ -394,21 +394,7 @@
         </div>
         
         <div class="chat-area" id="chatArea">
-            <div class="message agi">
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">
-                    <div>Hello! I'm AGI, and I'll help you complete your purchase of the Lavender Dreams Skincare Set for just 10 TDUST using secure payments.</div>
-                    <div class="message-time">Just now</div>
-                </div>
-            </div>
-            
-            <div class="message agi">
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">
-                    <div>At only 10 TDUST, this is a great deal! I'll handle all the crypto complexity invisibly - you'll just have a normal shopping conversation while I process everything securely. Ready to get started? 🛍️</div>
-                    <div class="message-time">Just now</div>
-                </div>
-            </div>
+            <!-- Initial messages will be loaded dynamically from the server -->
         </div>
         
         <div class="typing-indicator" id="typingIndicator">
@@ -424,10 +410,6 @@
         
         <div class="input-area">
             <div class="quick-actions">
-                <div class="quick-action" onclick="sendQuickMessage('Yes, let us proceed with the purchase')">✅ Proceed</div>
-                <div class="quick-action" onclick="sendQuickMessage('Check my wallet balance')">💰 Check Balance</div>
-                <div class="quick-action" onclick="setManualBalance()" id="manualBalanceBtn">🔧 Set Test Balance</div>
-                <div class="quick-action" onclick="refreshWalletConnection()">🔄 Refresh Wallet</div>
                 <div class="quick-action" onclick="showShippingForm()" id="shippingBtn" style="display: none;">📦 Add Shipping Address</div>
             </div>
             
@@ -785,9 +767,9 @@
                     type: 'chat',
                     message: message,
                     context: {
-                        product: 'Lavender Dreams Skincare Set',
-                        price: price,
-                        currency: currency
+                        product: 'Agility Summit Product',
+                        price: price || 'Variable',
+                        currency: currency || 'Multiple Options'
                     }
                 }));
                 
@@ -809,8 +791,14 @@
             
             if (data.type === 'wallet_status') {
                 updateWalletStatus(data);
-            } else if (data.type === 'chat_response') {
-                addMessage('agi', data.message);
+            } else if (data.type === 'chat_response' || data.type === 'aria_message') {
+                console.log('🔍 Received message with QR code:', !!data.qrCode);
+                if (data.qrCode) {
+                    console.log('🔍 QR code data length:', data.qrCode.length);
+                    console.log('🔍 About to call addMessage with QR code');
+                }
+                console.log('🔍 Calling addMessage with parameters:', 'agi', data.message.substring(0, 50) + '...', !!data.qrCode);
+                addMessage('agi', data.message, data.qrCode);
             } else if (data.type === 'mcp_response') {
                 handleMCPResponse(data);
             } else if (data.type === 'payment_complete') {
@@ -850,7 +838,7 @@
                 Transaction: ${data.txHash}
                 Estimated Delivery: ${data.estimatedDelivery}
                 
-                Your Lavender Dreams Skincare Set is on its way!
+                Your order is on its way!
             `;
             addMessage('agi', successMessage);
             
@@ -1106,8 +1094,12 @@
         
         // Handle shipping proof completion
         function handleShippingProofComplete(data) {
+            console.log('🔍 Processing shipping proof completion:', data);
+            
             if (data.result && data.result.success) {
                 const result = data.result;
+                console.log('🔍 ZK Proof result:', result);
+                
                 const proofMessage = `✅ **Real ZK Proof Generated Successfully!**
 
 🔐 **Proof Details:**
@@ -1123,14 +1115,56 @@ ${result.message || 'Your shipping address is now cryptographically committed wi
 • Your location remains completely private on-chain
 • Cryptographic proof enables secure delivery verification`;
 
+                console.log('🔍 About to add ZK proof message:', proofMessage.substring(0, 100) + '...');
+                
+                // Add a simple test message first to verify addMessage is working
+                addMessage('agi', '🧪 TEST: ZK Proof processing complete - this message should be visible!');
+                
+                // Then add the actual proof message
                 addMessage('agi', proofMessage);
+                
+                // Force scroll to bottom to ensure message is visible
+                setTimeout(() => {
+                    const chatArea = document.getElementById('chatArea');
+                    if (chatArea) {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                        console.log('🔍 Forced scroll to bottom, scrollTop:', chatArea.scrollTop, 'scrollHeight:', chatArea.scrollHeight);
+                    }
+                    
+                    // Check if message was actually added to DOM
+                    const messages = chatArea.querySelectorAll('.message');
+                    console.log('🔍 Total messages in chat:', messages.length);
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage) {
+                        console.log('🔍 Last message content preview:', lastMessage.textContent.substring(0, 100));
+                        console.log('🔍 Last message visible:', lastMessage.offsetHeight > 0);
+                    }
+                }, 100);
+                
+                // Hide the shipping form
+                setTimeout(() => {
+                    const form = document.getElementById('shippingForm');
+                    const btn = document.getElementById('shippingBtn');
+                    if (form) {
+                        form.classList.remove('show');
+                        console.log('🔍 Shipping form hidden');
+                    }
+                    if (btn) {
+                        btn.style.display = 'none';
+                        console.log('🔍 Shipping button hidden');
+                    }
+                }, 2000);
+                
             } else {
+                console.log('🔍 ZK proof failed or no result:', data);
                 addMessage('agi', '❌ ZK proof generation encountered an issue, but your privacy is still protected.');
             }
         }
         
         // Add message to chat
-        function addMessage(sender, text) {
+        function addMessage(sender, text, qrCode = null) {
+            console.log('🔍 addMessage called with:', { sender, textLength: text?.length, qrCodePresent: !!qrCode });
+            
             const chatArea = document.getElementById('chatArea');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
@@ -1143,7 +1177,63 @@ ${result.message || 'Your shipping address is now cryptographically committed wi
             content.className = 'message-content';
             
             const messageText = document.createElement('div');
-            messageText.innerHTML = text.replace(/\n/g, '<br>');
+            // Process text and remove QR code markdown if QR code is provided separately
+            let processedText = text;
+            if (qrCode && sender === 'agi') {
+                // Remove the markdown QR code section since we'll display it properly
+                processedText = text.replace(/📱 \*\*QR Code for Easy Payment:\*\*[\s\S]*?\*Scan this QR code with your XRPL wallet to auto-fill payment details\*/g, '');
+            }
+            messageText.innerHTML = processedText.replace(/\n/g, '<br>');
+            
+            // Add QR code if provided - ultra-simple version with maximum visibility
+            if (qrCode && sender === 'agi') {
+                console.log('🔍 ADDING QR CODE! Data length:', qrCode.length);
+                
+                // Create a very simple container with maximum z-index and positioning
+                const qrDiv = document.createElement('div');
+                qrDiv.style.cssText = `
+                    position: relative !important;
+                    z-index: 9999 !important;
+                    margin: 20px 0 !important;
+                    padding: 20px !important;
+                    background: yellow !important;
+                    border: 5px solid red !important;
+                    text-align: center !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    display: block !important;
+                    visibility: visible !important;
+                `;
+                
+                qrDiv.innerHTML = `
+                    <h3 style="color: black; font-size: 18px; margin: 10px 0;">📱 PAYMENT QR CODE HERE!</h3>
+                    <img src="${qrCode}" style="max-width: 250px; border: 3px solid black; display: block; margin: 10px auto;" alt="QR Code">
+                    <p style="color: black; font-size: 14px; margin: 10px 0;">Scan with XRPL wallet</p>
+                `;
+                
+                messageText.appendChild(qrDiv);
+                
+                // Also try adding it directly to the chat area as a backup
+                const chatArea = document.getElementById('chatArea');
+                if (chatArea) {
+                    const backupQR = qrDiv.cloneNode(true);
+                    backupQR.style.cssText += 'position: fixed !important; top: 50px !important; left: 50px !important; width: 300px !important;';
+                    chatArea.appendChild(backupQR);
+                    console.log('🔍 BACKUP QR CODE ADDED TO CHAT AREA');
+                }
+                
+                console.log('🔍 QR CODE CONTAINER ADDED TO DOM');
+                console.log('🔍 QR container element:', qrDiv);
+                console.log('🔍 QR container parent:', qrDiv.parentElement);
+                
+                // Scroll to make sure it's visible
+                setTimeout(() => {
+                    qrDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+                
+            } else if (sender === 'agi') {
+                console.log('🔍 No QR code data in message');
+            }
             
             const time = document.createElement('div');
             time.className = 'message-time';
@@ -1184,17 +1274,29 @@ ${result.message || 'Your shipping address is now cryptographically committed wi
                     const data = JSON.parse(event.data);
                     console.log('📨 Received from server:', data);
                     
-                    if (data.type === 'chat_response') {
-                        addMessage('agi', data.message);
+                    if (data.type === 'chat_response' || data.type === 'aria_message') {
+                        console.log('🔍 WebSocket handler - QR code present:', !!data.qrCode);
+                        addMessage('agi', data.message, data.qrCode);
                         
                         // Check if this is a payment completion that requires KYC
                         if (data.message && data.message.includes('Next Step: Privacy-Preserving KYC')) {
                             setTimeout(() => {
-                                addMessage('agi', '📋 **Ready for KYC Collection**\n\nClick the button below to securely provide your shipping information. I\'ll use zero-knowledge proofs to protect your privacy while enabling delivery verification.');
                                 document.getElementById('shippingBtn').style.display = 'block';
                                 document.getElementById('shippingBtn').scrollIntoView({ behavior: 'smooth' });
                             }, 1500);
                         }
+                        
+                        // Check if we should show KYC button
+                        if (data.showKYCButton) {
+                            setTimeout(() => {
+                                document.getElementById('shippingBtn').style.display = 'block';
+                                document.getElementById('shippingBtn').scrollIntoView({ behavior: 'smooth' });
+                            }, 500);
+                        }
+                    } else if (data.type === 'shipping_proof_complete') {
+                        console.log('🔍 Handling shipping proof completion:', data);
+                        handleShippingProofComplete(data);
+                        return; // Don't process as regular message
                         
                         // Check if this is KYC completion
                         if (data.message && data.message.includes('Order Complete!')) {
@@ -1275,8 +1377,10 @@ ${result.message || 'Your shipping address is now cryptographically committed wi
             }
         }
         
-        // Add message to chat
-        function addMessage(sender, message) {
+        // Add message to chat - UPDATED VERSION WITH QR CODE SUPPORT
+        function addMessage(sender, message, qrCode = null) {
+            console.log('🔍 addMessage FINAL called with:', { sender, messageLength: message?.length, qrCodePresent: !!qrCode });
+            
             const chatArea = document.getElementById('chatArea');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
@@ -1293,13 +1397,33 @@ ${result.message || 'Your shipping address is now cryptographically committed wi
                     <div class="message-time">${time}</div>
                 `;
             } else {
-                messageDiv.innerHTML = `
+                // Create AGI message with potential QR code
+                let messageContent = `
                     <div class="message-avatar">🤖</div>
                     <div class="message-body">
                         <div class="message-content">${message}</div>
                         <div class="message-time">${time}</div>
                     </div>
                 `;
+                
+                messageDiv.innerHTML = messageContent;
+                
+                // Add QR code if provided
+                if (qrCode && sender === 'agi') {
+                    console.log('🔍 ADDING QR CODE TO FINAL MESSAGE! Data length:', qrCode.length);
+                    
+                    const qrContainer = document.createElement('div');
+                    qrContainer.innerHTML = `
+                        <div style="margin: 20px 0; padding: 20px; background: yellow; border: 5px solid red; text-align: center; position: relative; z-index: 9999;">
+                            <h3 style="color: black; margin: 10px 0;">📱 PAYMENT QR CODE!</h3>
+                            <img src="${qrCode}" style="max-width: 250px; border: 3px solid black;" alt="QR Code">
+                            <p style="color: black; margin: 10px 0;">Scan with XRPL wallet</p>
+                        </div>
+                    `;
+                    
+                    messageDiv.appendChild(qrContainer);
+                    console.log('🔍 QR CODE ADDED TO FINAL MESSAGE');
+                }
             }
             
             chatArea.appendChild(messageDiv);
