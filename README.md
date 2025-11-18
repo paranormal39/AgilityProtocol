@@ -10,9 +10,7 @@ Agility is a pioneering financial service designed to revolutionize the security
 
 ### History
 
-Conceived in 2022 during Ripple's inaugural "real-life use cases" hackathon, Agility initially focused on enabling small businesses to accept XRPL tokens as payments similar to PayPal for business and ecommerce stores. We created a working prototype as an App and eventually one of Agility's developers, with the help of the XRdoge decentralized community (founders bags burned) created a hardware device to accompany the software.
-
-However, the project quickly evolved to address the pressing need for heightened security and data privacy within the Web3 landscape. The team of Agility decided to each go and learn different aspects of the challenges we were facing. Funding issues and legal clarity continued to stifle the actual product advancement, so becoming educated was vital while the tech caught up.
+"In 2020, my identity was stolen, and I was abandoned by systems that promised protection. That failure became my catalyst. I dove into the XRP Ledger, realizing that true compliance (KYC) and privacy are currently broken. My mission, focused on Midnight and the power of Zero-Knowledge Proofs (ZKPs), is to build smart contracts that can verify identity and compliance without ever revealing personal data—fixing the core problem I personally experienced."
 
 ### Vision
 
