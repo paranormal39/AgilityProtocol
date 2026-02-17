@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.agility-data/
+.agility-cli-data/
+.agility-cli-test/
+*.log
+.DS_Store
+.env
+.env.local

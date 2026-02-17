@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agility Protocol - Browser Demo</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --success: #22c55e;
+      --error: #ef4444;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .version {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .step-number {
+      background: var(--primary);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: bold;
+    }
+    
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: var(--primary-dark);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .status {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    
+    .status.success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--success);
+    }
+    
+    .status.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+    }
+    
+    .status.pending {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid var(--primary);
+    }
+    
+    .permissions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    
+    .permission-tag {
+      background: var(--primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+    }
+    
+    .result-icon {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    
+    .checks {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .check.pass::before {
+      content: '✅';
+    }
+    
+    .check.fail::before {
+      content: '❌';
+    }
+    
+    #lace-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    
+    .dot.connected {
+      background: var(--success);
+    }
+    
+    .dot.disconnected {
+      background: var(--error);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔐 Agility Protocol Demo</h1>
+      <p class="version">Protocol Version: <span id="protocol-version">0.1.0</span></p>
+    </header>
+
+    <!-- Step 1: Connect Lace -->
+    <div class="card">
+      <h2><span class="step-number">1</span> Connect Lace Wallet</h2>
+      <div id="lace-status">
+        <span class="dot disconnected" id="lace-dot"></span>
+        <span id="lace-status-text">Not connected</span>
+      </div>
+      <button id="connect-btn" onclick="connectLace()">Connect Lace</button>
+      <div id="connect-result" class="status" style="display: none;"></div>
+    </div>
+
+    <!-- Step 2: Generate ProofRequest -->
+    <div class="card">
+      <h2><span class="step-number">2</span> Generate ProofRequest</h2>
+      <p style="color: var(--muted); margin-bottom: 1rem;">Required permissions:</p>
+      <div class="permissions">
+        <span class="permission-tag">age_over_18</span>
+        <span class="permission-tag">email_verified</span>
+      </div>
+      <button id="request-btn" onclick="generateRequest()" disabled>Generate Request</button>
+      <div id="request-result" class="status" style="display: none;"></div>
+    </div>
+
+    <!-- Step 3: Sign & Generate Proof -->
+    <div class="card">
+      <h2><span class="step-number">3</span> Sign Consent & Generate Proof</h2>
+      <p style="color: var(--muted); margin-bottom: 1rem;">User signs consent with Lace wallet</p>
+      <button id="sign-btn" onclick="signAndProve()" disabled>Sign & Generate Proof</button>
+      <div id="sign-result" class="status" style="display: none;"></div>
+    </div>
+
+    <!-- Step 4: Verify Proof -->
+    <div class="card">
+      <h2><span class="step-number">4</span> Verify Proof</h2>
+      <button id="verify-btn" onclick="verifyProof()" disabled>Verify Proof</button>
+      <div id="verify-result" class="status" style="display: none;"></div>
+      <div id="checks-container" style="display: none;">
+        <div class="checks" id="checks"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let laceConnected = false;
+    let currentRequest = null;
+    let currentProof = null;
+    let laceAddresses = [];
+
+    // Check for Lace wallet
+    function checkLaceAvailable() {
+      return typeof window.cardano !== 'undefined' && typeof window.cardano.lace !== 'undefined';
+    }
+
+    // Connect to Lace wallet
+    async function connectLace() {
+      const resultEl = document.getElementById('connect-result');
+      resultEl.style.display = 'block';
+      resultEl.className = 'status pending';
+      resultEl.textContent = 'Connecting to Lace...';
+
+      try {
+        if (!checkLaceAvailable()) {
+          // Simulate connection for demo purposes
+          await new Promise(r => setTimeout(r, 500));
+          laceConnected = true;
+          laceAddresses = ['addr_test1qz...demo'];
+          
+          document.getElementById('lace-dot').className = 'dot connected';
+          document.getElementById('lace-status-text').textContent = 'Connected (Demo Mode)';
+          document.getElementById('request-btn').disabled = false;
+          
+          resultEl.className = 'status success';
+          resultEl.textContent = `Connected in demo mode\nNote: Install Lace extension for real wallet integration`;
+          return;
+        }
+
+        const api = await window.cardano.lace.enable();
+        laceConnected = true;
+        laceAddresses = await api.getUsedAddresses();
+
+        document.getElementById('lace-dot').className = 'dot connected';
+        document.getElementById('lace-status-text').textContent = `Connected (${laceAddresses.length} addresses)`;
+        document.getElementById('request-btn').disabled = false;
+
+        resultEl.className = 'status success';
+        resultEl.textContent = `Connected!\nAddresses: ${laceAddresses.length}`;
+      } catch (error) {
+        resultEl.className = 'status error';
+        resultEl.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Generate a ProofRequest
+    async function generateRequest() {
+      const resultEl = document.getElementById('request-result');
+      resultEl.style.display = 'block';
+      resultEl.className = 'status pending';
+      resultEl.textContent = 'Generating ProofRequest...';
+
+      try {
+        // Simulate request generation
+        await new Promise(r => setTimeout(r, 300));
+
+        currentRequest = {
+          requestId: crypto.randomUUID(),
+          requiredPermissions: ['age_over_18', 'email_verified'],
+          nonce: Array.from(crypto.getRandomValues(new Uint8Array(16)))
+            .map(b => b.toString(16).padStart(2, '0')).join(''),
+          audience: 'agility-browser-demo',
+          expiresAt: new Date(Date.now() + 300000).toISOString(),
+          issuedAt: new Date().toISOString(),
+          version: '0.1',
+          protocolVersion: '0.1.0',
+        };
+
+        document.getElementById('sign-btn').disabled = false;
+
+        resultEl.className = 'status success';
+        resultEl.textContent = `Request created!\n\nID: ${currentRequest.requestId}\nNonce: ${currentRequest.nonce.slice(0, 16)}...\nExpires: ${currentRequest.expiresAt}`;
+      } catch (error) {
+        resultEl.className = 'status error';
+        resultEl.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Sign consent and generate proof
+    async function signAndProve() {
+      const resultEl = document.getElementById('sign-result');
+      resultEl.style.display = 'block';
+      resultEl.className = 'status pending';
+      resultEl.textContent = 'Signing consent...';
+
+      try {
+        // Simulate signing
+        await new Promise(r => setTimeout(r, 500));
+
+        const signature = 'agility_sig_' + Array.from(crypto.getRandomValues(new Uint8Array(24)))
+          .map(b => b.toString(16).padStart(2, '0')).join('');
+
+        currentProof = {
+          proofId: crypto.randomUUID(),
+          requestId: currentRequest.requestId,
+          audience: currentRequest.audience,
+          nonce: currentRequest.nonce,
+          satisfiedPermissions: currentRequest.requiredPermissions,
+          verified: true,
+          issuedAt: new Date().toISOString(),
+          expiresAt: currentRequest.expiresAt,
+          proof: { type: 'demo_proof', signature },
+          binding: { requestHash: 'demo_hash_' + currentRequest.requestId.slice(0, 8) },
+          prover: { type: 'local', id: 'did:agility:demo' },
+          version: '0.1',
+          protocolVersion: '0.1.0',
+        };
+
+        document.getElementById('verify-btn').disabled = false;
+
+        resultEl.className = 'status success';
+        resultEl.textContent = `Proof generated!\n\nProof ID: ${currentProof.proofId}\nSignature: ${signature.slice(0, 32)}...`;
+      } catch (error) {
+        resultEl.className = 'status error';
+        resultEl.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Verify the proof
+    async function verifyProof() {
+      const resultEl = document.getElementById('verify-result');
+      const checksContainer = document.getElementById('checks-container');
+      const checksEl = document.getElementById('checks');
+      
+      resultEl.style.display = 'block';
+      resultEl.className = 'status pending';
+      resultEl.textContent = 'Verifying proof...';
+
+      try {
+        // Simulate verification
+        await new Promise(r => setTimeout(r, 400));
+
+        const checks = {
+          schemaValid: true,
+          notExpired: new Date(currentProof.expiresAt) > new Date(),
+          audienceMatch: currentProof.audience === currentRequest.audience,
+          nonceMatch: currentProof.nonce === currentRequest.nonce,
+          requestIdMatch: currentProof.requestId === currentRequest.requestId,
+          permissionsSatisfied: currentRequest.requiredPermissions.every(
+            p => currentProof.satisfiedPermissions.includes(p)
+          ),
+          bindingValid: true,
+        };
+
+        const allValid = Object.values(checks).every(v => v);
+
+        checksContainer.style.display = 'block';
+        checksEl.innerHTML = Object.entries(checks)
+          .map(([key, value]) => `<div class="check ${value ? 'pass' : 'fail'}">${key}</div>`)
+          .join('');
+
+        if (allValid) {
+          resultEl.className = 'status success';
+          resultEl.innerHTML = `<div class="result-icon">✅</div>Verification PASSED!\n\nAll ${Object.keys(checks).length} checks passed.`;
+        } else {
+          resultEl.className = 'status error';
+          resultEl.innerHTML = `<div class="result-icon">❌</div>Verification FAILED!\n\nSome checks did not pass.`;
+        }
+      } catch (error) {
+        resultEl.className = 'status error';
+        resultEl.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      if (checkLaceAvailable()) {
+        document.getElementById('lace-status-text').textContent = 'Lace detected - click to connect';
+      } else {
+        document.getElementById('lace-status-text').textContent = 'Lace not detected - demo mode available';
+      }
+    });
+  </script>
+</body>
+</html>

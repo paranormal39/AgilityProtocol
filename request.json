@@ -1,0 +1,11 @@
+{
+  "requestId": "1232f88e-db3d-4fc5-b286-738043096688",
+  "requiredPermissions": [
+    "age_over_18"
+  ],
+  "nonce": "0e8282f7e62d591fce9921b4e74fe6d2",
+  "audience": "test_app",
+  "expiresAt": "2026-02-17T04:11:43.690Z",
+  "issuedAt": "2026-02-17T04:06:43.690Z",
+  "version": "0.1"
+}
