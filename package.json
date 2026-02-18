@@ -1,48 +1,32 @@
 {
   "name": "agility-headless",
   "version": "1.0.0",
-  "description": "Headless Identity Wallet Engine for orchestrating private identity proofs using Midnight and public settlement using XRPL",
+  "description": "Agility Protocol - Privacy-preserving identity verification",
   "type": "module",
   "main": "dist/AgilityHeadless.js",
-  "types": "dist/AgilityHeadless.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/AgilityHeadless.js",
-      "types": "./dist/AgilityHeadless.d.ts"
-    }
-  },
-  "bin": {
-    "agility": "./dist/cli.js"
-  },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist",
     "cli": "node dist/cli.js",
-    "dev:cli": "npx tsx src/cli.ts",
-    "prepublishOnly": "npm run build"
-  },
-  "engines": {
-    "node": ">=20.0.0"
+    "test": "node dist/tests/protocol.test.js && node dist/tests/prover.test.js && node dist/tests/signer.test.js && node dist/tests/credential.test.js"
   },
   "keywords": [
     "identity",
-    "wallet",
-    "xrpl",
+    "privacy",
     "midnight",
-    "did",
+    "xrpl",
     "verifiable-credentials",
-    "zero-knowledge-proofs"
+    "zero-knowledge"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.3.1",
-    "xrpl": "^3.0.0",
-    "zod": "^3.22.4"
+    "dotenv": "^17.3.1",
+    "xrpl": "^4.2.0",
+    "xumm-sdk": "^1.11.2",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.0"
+    "@types/node": "^22.13.4",
+    "typescript": "^5.7.3"
   }
 }
