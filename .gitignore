@@ -3,6 +3,15 @@ dist/
 .agility-data/
 .agility-cli-data/
 .agility-cli-test/
+.agility-phase1-test/
+.agility-phase1-test-2/
+.agility-phase2-test/
+.agility-prover-test/
+.agility-signer-test/
+.agility-test-temp/
+.agility-demo-offline/
+.agility-test-phase7/
+data/
 *.log
 .DS_Store
 .env

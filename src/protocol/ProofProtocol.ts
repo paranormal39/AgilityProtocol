@@ -10,6 +10,15 @@ import type { Logger } from '../utils/Logger.js';
 import type { VerifiableCredential } from '../credentials/VerifiableCredential.js';
 import { validateVerifiableCredential, extractClaimPermissions } from '../credentials/VerifiableCredential.js';
 import { PROTOCOL_VERSION, isProtocolVersionSupported, UnsupportedProtocolVersionError } from '../constants/protocol.js';
+import {
+  validateTimeRange,
+  VerificationErrorCode,
+  ENABLE_REPLAY_PROTECTION,
+  MAX_PROOF_AGE_SECONDS,
+  isoToSeconds,
+  getNow,
+} from '../security/config.js';
+import { getReplayStore, generateReplayKey } from '../security/ReplayStore.js';
 
 export interface CreateRequestOptions {
   audience: string;
@@ -31,9 +40,13 @@ export interface CreateProofOptions {
 export interface VerifyResult {
   valid: boolean;
   errors: string[];
+  errorCodes?: VerificationErrorCode[];
   checks: {
     schemaValid: boolean;
     notExpired: boolean;
+    timeRangeValid: boolean;
+    notTooOld: boolean;
+    notReplay: boolean;
     audienceMatch: boolean;
     nonceMatch: boolean;
     requestIdMatch: boolean;
@@ -202,9 +215,13 @@ export class ProofProtocol {
 
   verify(request: ProofRequest, proof: ProofResponse, grant?: ConsentGrant): VerifyResult {
     const errors: string[] = [];
+    const errorCodes: VerificationErrorCode[] = [];
     const checks: VerifyResult['checks'] = {
       schemaValid: true,
       notExpired: true,
+      timeRangeValid: true,
+      notTooOld: true,
+      notReplay: true,
       audienceMatch: true,
       nonceMatch: true,
       requestIdMatch: true,
@@ -226,11 +243,59 @@ export class ProofProtocol {
       errors.push(`Invalid ProofResponse schema: ${e instanceof Error ? e.message : String(e)}`);
     }
 
+    // Time validation for request
+    const requestTimeResult = validateTimeRange(request.issuedAt, request.expiresAt);
+    if (!requestTimeResult.valid) {
+      checks.timeRangeValid = false;
+      if (requestTimeResult.errorCode) {
+        errorCodes.push(requestTimeResult.errorCode);
+        if (requestTimeResult.errorCode === VerificationErrorCode.EXPIRED) {
+          checks.notExpired = false;
+        }
+        if (requestTimeResult.errorCode === VerificationErrorCode.PROOF_TOO_OLD) {
+          checks.notTooOld = false;
+        }
+      }
+      errors.push(requestTimeResult.errorMessage || 'Invalid request time range');
+    }
+
+    // Time validation for proof
+    const proofTimeResult = validateTimeRange(proof.issuedAt, proof.expiresAt);
+    if (!proofTimeResult.valid) {
+      checks.timeRangeValid = false;
+      if (proofTimeResult.errorCode) {
+        errorCodes.push(proofTimeResult.errorCode);
+        if (proofTimeResult.errorCode === VerificationErrorCode.EXPIRED) {
+          checks.notExpired = false;
+        }
+        if (proofTimeResult.errorCode === VerificationErrorCode.PROOF_TOO_OLD) {
+          checks.notTooOld = false;
+        }
+      }
+      errors.push(proofTimeResult.errorMessage || 'Invalid proof time range');
+    }
+
+    // Time validation for grant (if provided)
+    if (grant) {
+      const grantTimeResult = validateTimeRange(grant.issuedAt, grant.expiresAt);
+      if (!grantTimeResult.valid) {
+        checks.timeRangeValid = false;
+        if (grantTimeResult.errorCode) {
+          errorCodes.push(grantTimeResult.errorCode);
+        }
+        errors.push(grantTimeResult.errorMessage || 'Invalid grant time range');
+      }
+    }
+
+    // Legacy expiry check (kept for backwards compatibility)
     const now = new Date();
     const expiresAt = new Date(request.expiresAt);
     if (now > expiresAt) {
       checks.notExpired = false;
-      errors.push(`Request expired at ${request.expiresAt}`);
+      if (!errorCodes.includes(VerificationErrorCode.EXPIRED)) {
+        errorCodes.push(VerificationErrorCode.EXPIRED);
+        errors.push(`Request expired at ${request.expiresAt}`);
+      }
     }
 
     if (proof.audience !== request.audience) {
@@ -317,6 +382,31 @@ export class ProofProtocol {
       }
     }
 
+    // Replay protection check (after all structural validation, before returning success)
+    if (ENABLE_REPLAY_PROTECTION && checks.schemaValid && checks.bindingValid) {
+      const replayKey = generateReplayKey(proof.prover.id, proof.binding.requestHash);
+      const replayStore = getReplayStore();
+
+      if (replayStore.has(replayKey)) {
+        checks.notReplay = false;
+        errorCodes.push(VerificationErrorCode.REPLAY_DETECTED);
+        errors.push('Proof has already been used (replay detected)');
+
+        this.logger?.debug('Replay attack detected', {
+          requestId: request.requestId,
+          proofId: proof.proofId,
+          proverId: proof.prover.id,
+        });
+      } else if (errors.length === 0) {
+        // Only add to replay store if verification passes
+        const ttlSeconds = Math.max(
+          300,
+          Math.floor((new Date(request.expiresAt).getTime() - Date.now()) / 1000)
+        );
+        replayStore.add(replayKey, ttlSeconds);
+      }
+    }
+
     this.logger?.debug('Verification result', {
       valid: errors.length === 0,
       checks,
@@ -326,6 +416,7 @@ export class ProofProtocol {
     return {
       valid: errors.length === 0,
       errors,
+      errorCodes: errorCodes.length > 0 ? errorCodes : undefined,
       checks,
     };
   }

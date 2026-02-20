@@ -1,13 +1,41 @@
 {
-  "name": "agility-headless",
+  "name": "@agility-protocol/headless",
   "version": "1.0.0",
-  "description": "Agility Protocol - Privacy-preserving identity verification",
+  "description": "Agility Protocol - Privacy-preserving identity verification SDK",
   "type": "module",
-  "main": "dist/AgilityHeadless.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./cli": "./dist/cli.js"
+  },
+  "bin": {
+    "agility": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "cli": "node dist/cli.js",
-    "test": "node dist/tests/protocol.test.js && node dist/tests/prover.test.js && node dist/tests/signer.test.js && node dist/tests/credential.test.js"
+    "test": "node dist/tests/protocol.test.js && node dist/tests/prover.test.js && node dist/tests/signer.test.js && node dist/tests/credential.test.js",
+    "test:phase1": "node dist/tests/phase1-replay.test.js",
+    "test:phase2": "node dist/tests/phase2-xrpl.test.js",
+    "test:phase4": "node dist/tests/phase4.test.js",
+    "test:phase5": "node dist/tests/phase5-vc.test.js",
+    "test:robustness": "node dist/tests/robustness.test.js",
+    "test:phase6": "node dist/tests/forward-compatibility.test.js",
+    "test:security": "node dist/tests/phase1-replay.test.js && node dist/tests/phase2-xrpl.test.js && node dist/tests/phase4.test.js",
+    "test:all": "npm run test && npm run test:security && npm run test:robustness",
+    "demo:offline": "node dist/cli.js demo offline",
+    "demo:xrpl": "node dist/cli.js demo xrpl",
+    "demo:cardano": "node dist/cli.js demo cardano"
   },
   "keywords": [
     "identity",

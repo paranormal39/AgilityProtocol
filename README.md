@@ -1,209 +1,171 @@
 # Agility Protocol
 
-**Protocol Version: 0.1.0**
-
-A privacy-preserving identity verification protocol built on Midnight and XRPL.
+**Protocol Version: 1.0** | **127+ Tests** | **TypeScript**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## What is Agility?
+## What is Agility Protocol?
 
-Agility is a **wallet-controlled selective disclosure protocol** that enables applications to verify user eligibility without exposing wallet history, balances, or personal data.
+Agility is a **privacy-preserving identity verification protocol** that enables applications to verify user eligibility without exposing wallet history, balances, or personal data.
+
+The protocol uses a simple three-message flow:
 
 ```
-ProofRequest → ConsentGrant → ProofResponse
+Verifier                          Prover (Wallet)
+   │                                   │
+   │  1. ProofRequest ─────────────►   │
+   │                                   │  (User reviews & consents)
+   │  ◄───────────── 2. ConsentGrant   │
+   │  ◄───────────── 3. ProofResponse  │
+   │                                   │
+   ▼  (Verify proof)                   ▼
 ```
 
-- **Midnight** provides private computation, encrypted storage, and zero-knowledge proof infrastructure
-- **XRPL** provides public anchoring and tamper-evident settlement receipts
-- **Lace & Xaman** wallets handle signing — Agility never touches private keys
+**Key Properties:**
+- **Privacy-Preserving** — Selective disclosure reveals only what's needed
+- **Wallet-Controlled** — Users sign consent; Agility never holds keys
+- **Pairwise DIDs** — Unique identifier per application prevents tracking
+- **Replay-Resistant** — Nonce + expiry + replay cache prevent proof reuse
+- **Chain-Agnostic** — Optional anchoring on XRPL or Cardano
 
 ## Quick Start
 
 ```bash
-# Install
+# Install dependencies
 npm install
+
+# Build the project
 npm run build
 
-# Run a demo verification flow
-npm run cli -- demo phase4
+# Run offline demo (no network required)
+npm run demo:offline
 
-# Check Midnight network health
-npm run cli -- midnight health
+# Run all tests
+npm run test:all
 ```
 
 ## SDK Usage
 
 ```typescript
-import { Verifier, initProver, PROTOCOL_VERSION } from '@agility/sdk';
+import { 
+  ProofProtocol, 
+  LocalProver, 
+  JsonPersistence,
+  PROTOCOL_VERSION 
+} from '@agility-protocol/headless';
+
+// Initialize
+const persistence = new JsonPersistence('./data');
+await persistence.initialize();
+
+const protocol = new ProofProtocol(persistence);
+const prover = new LocalProver(persistence);
+await prover.initialize();
 
 // Verifier creates a request
-const verifier = new Verifier({ persistence, logger });
-const request = await verifier.createProofRequest({
+const request = await protocol.createRequest({
   audience: 'my-app',
-  requiredPermissions: ['age_over_18', 'email_verified'],
+  requiredPermissions: ['age_over_18'],
+  ttlSeconds: 300,
 });
 
-// Prover generates consent and proof
-const prover = await initProver({ persistence, logger });
-const grant = prover.createConsentGrant({ request });
-const proof = prover.generateProof({ request, grant });
+// Prover creates consent and proof
+const grant = prover.createConsentGrant(request);
+const proof = await protocol.createProof({
+  request,
+  grant,
+  deckPermissions: request.requiredPermissions,
+});
 
 // Verifier validates
-const result = verifier.verifyProof({ request, proof });
+const result = protocol.verify(request, proof, grant);
 console.log(result.valid); // true
 ```
 
-## Protocol Flow
+## Feature Flags
 
-```
-┌──────────────┐                      ┌──────────────┐
-│   VERIFIER   │                      │    PROVER    │
-│  (Your App)  │                      │   (Wallet)   │
-└──────┬───────┘                      └──────┬───────┘
-       │                                     │
-       │  1. Create ProofRequest             │
-       │  ──────────────────────────────►    │
-       │                                     │
-       │                                     │  2. Review & Consent
-       │                                     │  3. Generate Proof
-       │                                     │
-       │    ◄──────────────────────────────  │
-       │  4. Verify ProofResponse            │
-       │                                     │
-       │  5. (Optional) Anchor to XRPL       │
-       ▼                                     ▼
-```
+| Flag | Default | Description |
+|------|---------|-------------|
+| `ENABLE_REPLAY_PROTECTION` | `true` | Prevent proof reuse |
+| `ENABLE_XRPL_CONSENT_TX_VERIFY` | `false` | Verify XRPL on-chain consent |
+| `ENABLE_CARDANO_SIGNDATA_VERIFY` | `false` | Verify Cardano CIP-30 signatures |
+| `ENABLE_PAIRWISE_DID` | `true` | Use pairwise DIDs per audience |
+| `ENABLE_STRICT_DECK_PERMISSIONS` | `false` | Strict permission validation |
 
-## Midnight Compatibility Matrix
-
-| Component | Version |
-|-----------|---------|
-| Node | 0.20.1 |
-| Proof Server | 7.0.0 |
-| Indexer | 3.0.0 |
-| DApp Connector API | 4.0.0 |
-| Wallet SDK | 1.0.0 |
-
-## Network Environments
-
-| Environment | Description |
-|-------------|-------------|
-| `preprod` | Midnight Pre-Production (default) |
-| `preview` | Midnight Preview |
-| `local` | Local development |
-
+Set via environment variables:
 ```bash
-export MIDNIGHT_ENV=preprod
+export ENABLE_XRPL_CONSENT_TX_VERIFY=true
+export XRPL_RPC_URL=https://s.altnet.rippletest.net:51234
 ```
+
+## Demo Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run demo:offline` | Full verification (no network) |
+| `npm run demo:xrpl` | XRPL consent verification |
+| `npm run demo:cardano` | Cardano signData verification |
+| `npm run test:all` | Run all 127+ tests |
 
 ## CLI Commands
 
 | Command | Description |
 |---------|-------------|
-| `npm run cli -- midnight health` | Check network connectivity |
-| `npm run cli -- lace capabilities` | Show Lace wallet capabilities |
-| `npm run cli -- demo phase4` | Run verification demo |
-| `npm run cli -- request --audience <app> --perm <perms>` | Create ProofRequest |
-| `npm run cli -- verify --request <file> --proof <file>` | Verify a proof |
+| `npm run cli -- demo offline` | Offline verification demo |
+| `npm run cli -- demo xrpl` | XRPL consent demo |
+| `npm run cli -- demo cardano` | Cardano signData demo |
+| `npm run cli -- deck create` | Create a deck instance |
+| `npm run cli -- request --perm <perms>` | Create ProofRequest |
 
-## Examples
+## Documentation
 
-### Node Verifier Server
+| Document | Description |
+|----------|-------------|
+| [PROTOCOL.md](docs/PROTOCOL.md) | Formal protocol specification |
+| [PRIVACY_PROPERTIES.md](docs/PRIVACY_PROPERTIES.md) | Privacy guarantees and threat model |
+| [DECKS.md](docs/DECKS.md) | Permission deck system |
+| [DEMO.md](docs/DEMO.md) | Demo walkthroughs and tutorials |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture |
 
-```bash
-cd examples/node-verifier-server
-npm install && npm start
-```
+## Verification Pipeline
 
-Endpoints:
-- `POST /request` — Create ProofRequest
-- `POST /verify` — Verify ProofResponse
-- `GET /health` — Health check
-
-### Browser Demo
-
-```bash
-cd examples/browser-demo
-# Open index.html in browser
-```
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Agility SDK                             │
-├─────────────────────────────────────────────────────────────┤
-│  Verifier  │  Prover  │  Credentials  │  Adapters           │
-├─────────────────────────────────────────────────────────────┤
-│                       Adapters                               │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
-│  │  XRPL Adapter   │  │ Midnight Adapter│  │ Lace Adapter│  │
-│  │  (Settlement)   │  │ (Private Proofs)│  │ (Wallet)    │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│                    Encrypted Storage                         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Key Features
-
-- **Privacy-Preserving** — Zero-knowledge proofs reveal nothing beyond the claim
-- **Wallet-Controlled** — Users sign consent; Agility never holds keys
-- **Pairwise Identifiers** — Unique ID per application prevents tracking
-- **Cross-Chain** — Midnight for privacy, XRPL for public anchoring
-- **Replay-Resistant** — Nonce + expiry prevent proof reuse
-
-## Verification Checks
+The protocol performs these checks in order:
 
 | Check | Description |
 |-------|-------------|
 | Schema Valid | Request/Response match protocol schema |
+| Time Range Valid | issuedAt/expiresAt sanity checks |
 | Not Expired | `now < expiresAt` |
+| Not Too Old | Proof age within 600 seconds |
+| Not Replay | Proof not previously used |
 | Audience Match | Proof audience matches request |
 | Nonce Match | Proof nonce matches request |
 | Permissions Satisfied | All required permissions present |
 | Binding Valid | `sha256(request) == proof.binding.requestHash` |
+| XRPL Consent | (Optional) On-chain consent verification |
+| Cardano Consent | (Optional) CIP-30 signature verification |
 
 ## Project Structure
 
 ```
 src/
-├── sdk/           # SDK modules (verifier, prover, credentials, adapters)
-├── protocol/      # Core protocol logic
-├── schemas/       # Zod schemas for ProofRequest, ConsentGrant, ProofResponse
-├── adapters/      # XRPL, Midnight, Lace adapters
-├── credentials/   # Verifiable Credentials
-├── config/        # Network presets
+├── protocol/      # Core protocol logic (ProofProtocol)
+├── schemas/       # Zod schemas (ProofRequest, ConsentGrant, ProofResponse)
+├── decks/         # Permission deck system
+├── did/           # DID resolution and pairwise DIDs
+├── adapters/      # Chain adapters (XRPL, Cardano, Midnight)
+├── security/      # Replay protection, time validation
+├── w3c/           # W3C Verifiable Credentials adapter
+├── credentials/   # Credential issuing and storage
 └── cli.ts         # CLI entry point
 ```
 
-## Configuration
-
-```typescript
-const agility = new AgilityHeadless({
-  storagePath: './my-data',
-  encryptStorage: true,
-  xrplNetwork: 'testnet',
-  midnightNetwork: 'preprod',
-});
-```
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `storagePath` | `./.agility-data` | Local storage path |
-| `encryptStorage` | `false` | Enable AES encryption |
-| `xrplNetwork` | `testnet` | XRPL network |
-| `midnightNetwork` | `preprod` | Midnight network |
-
-## Environment Variables
+## Test Coverage
 
 ```bash
-# .env
-AGILITY_MODE=mock           # mock | real
-MIDNIGHT_ENV=preprod        # preprod | preview | local
-XRPL_NETWORK=testnet
-XRPL_SEED=sYourSeedHere     # For real mode
+npm run test:all    # Run all tests (127+)
+npm run test:phase1 # Security hardening tests
+npm run test:phase6 # Forward compatibility tests
 ```
 
 ## License
