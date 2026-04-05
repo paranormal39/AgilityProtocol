@@ -48,13 +48,20 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@midnight-ntwrk/midnight-js-contracts": "^4.0.2",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^4.0.2",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^4.0.2",
+    "@midnight-ntwrk/midnight-js-network-id": "^4.0.2",
+    "@midnight-ntwrk/midnight-js-types": "^4.0.2",
     "dotenv": "^17.3.1",
+    "uuid": "^9.0.0",
     "xrpl": "^4.2.0",
     "xumm-sdk": "^1.11.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
+    "@types/uuid": "^9.0.0",
     "typescript": "^5.7.3"
   }
 }

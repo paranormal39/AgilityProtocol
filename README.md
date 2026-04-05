@@ -1,12 +1,20 @@
 # Agility Protocol
 
-**Protocol Version: 1.0** | **127+ Tests** | **TypeScript**
+**Protocol Version: 1.0** | **127+ Tests** | **TypeScript** | **Multi-Chain**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## What is Agility Protocol?
 
-Agility is a **privacy-preserving identity verification protocol** that enables applications to verify user eligibility without exposing wallet history, balances, or personal data.
+Agility is a **privacy-preserving identity verification and payment protocol** that enables applications to verify user eligibility and process payments without exposing wallet history, balances, or personal data.
+
+### Supported Networks
+
+| Network | Payments | ZK Proofs | Wallet |
+|---------|----------|-----------|--------|
+| **XRPL** | ✅ | - | XUMM |
+| **Midnight** | ✅ | ✅ | Lace |
+| **Cardano** | ✅ | ⚠️ | Lace |
 
 The protocol uses a simple three-message flow:
 
@@ -122,6 +130,9 @@ export XRPL_RPC_URL=https://s.altnet.rippletest.net:51234
 | Document | Description |
 |----------|-------------|
 | [PROTOCOL.md](docs/PROTOCOL.md) | Formal protocol specification |
+| [PAYMENTS.md](docs/PAYMENTS.md) | Payment module specification |
+| [INTEGRATION.md](docs/INTEGRATION.md) | Complete integration guide |
+| [CHAINS.md](docs/CHAINS.md) | Chain-specific documentation |
 | [PRIVACY_PROPERTIES.md](docs/PRIVACY_PROPERTIES.md) | Privacy guarantees and threat model |
 | [DECKS.md](docs/DECKS.md) | Permission deck system |
 | [DEMO.md](docs/DEMO.md) | Demo walkthroughs and tutorials |
@@ -148,16 +159,83 @@ The protocol performs these checks in order:
 ## Project Structure
 
 ```
-src/
-├── protocol/      # Core protocol logic (ProofProtocol)
-├── schemas/       # Zod schemas (ProofRequest, ConsentGrant, ProofResponse)
-├── decks/         # Permission deck system
-├── did/           # DID resolution and pairwise DIDs
-├── adapters/      # Chain adapters (XRPL, Cardano, Midnight)
-├── security/      # Replay protection, time validation
-├── w3c/           # W3C Verifiable Credentials adapter
-├── credentials/   # Credential issuing and storage
-└── cli.ts         # CLI entry point
+├── src/                    # Core SDK
+│   ├── protocol/           # Core protocol logic (ProofProtocol)
+│   ├── schemas/            # Zod schemas (ProofRequest, ConsentGrant, ProofResponse)
+│   ├── decks/              # Permission deck system
+│   ├── did/                # DID resolution and pairwise DIDs
+│   ├── adapters/           # Chain adapters (XRPL, Cardano, Midnight, Lace)
+│   ├── security/           # Replay protection, time validation
+│   ├── w3c/                # W3C Verifiable Credentials adapter
+│   └── credentials/        # Credential issuing and storage
+│
+├── agility-qr/             # QR-based proof exchange
+│   ├── qr/                 # Core QR functions
+│   ├── shared/             # Encoding/decoding utilities
+│   ├── payments/           # Payment QR integration
+│   ├── wallet-demo/        # Customer wallet demo
+│   ├── verifier-demo/      # Age verification demo
+│   ├── merchant-demo/      # Merchant portal demo
+│   └── courier-demo/       # Courier portal demo
+│
+├── agility-payments/       # Multi-chain payment module
+│   ├── core/               # Types and chain bridge interface
+│   ├── xrpl/               # XRPL payment adapter
+│   ├── midnight/           # Midnight ZK payment adapter
+│   ├── lace/               # Lace wallet adapter
+│   └── bundle/             # KYC + Payment bundling
+│
+└── docs/                   # Documentation
+```
+
+## Payment Integration
+
+```typescript
+import { 
+  createXrplPaymentAdapter,
+  createMerchantCheckout,
+  verifyMerchantBundle 
+} from '@agility-protocol/headless/agility-payments';
+
+// Create payment with KYC requirements
+const checkout = createMerchantCheckout({
+  merchantId: 'wine-shop',
+  merchantName: 'Premium Wine Shop',
+  orderId: 'ORD-001',
+  items: [{ name: 'Vintage Red', price: 89.99, quantity: 2 }],
+  currency: 'XRP',
+  network: 'xrpl',
+  destinationAddress: 'rXXX...',
+  requireAge: 21,        // Age verification
+  requireKyc: true,      // Identity verification
+});
+
+// Verify complete bundle (payment + KYC)
+const result = await verifyMerchantBundle(checkout.paymentRequest, customerBundle);
+
+if (result.valid && result.paymentConfirmed && result.kycVerified) {
+  console.log('✅ Payment and KYC verified');
+}
+```
+
+## QR-Based Flows
+
+```typescript
+import { createPaymentQR, verifyPaymentQR } from '@agility-protocol/headless/agility-qr/payments';
+
+// Merchant creates payment QR
+const qr = createPaymentQR({
+  merchantId: 'store-123',
+  amount: '50.00',
+  currency: 'XRP',
+  network: 'xrpl',
+  destinationAddress: 'rXXX...',
+  requiredKyc: ['age_over_18'],
+});
+
+// Customer scans, pays, creates response QR
+// Merchant verifies
+const result = verifyPaymentQR({ originalRequest, responseQR });
 ```
 
 ## Test Coverage
@@ -167,6 +245,16 @@ npm run test:all    # Run all tests (127+)
 npm run test:phase1 # Security hardening tests
 npm run test:phase6 # Forward compatibility tests
 ```
+
+## Midnight.js Integration
+
+This SDK integrates with official Midnight.js packages (v4.0.2):
+
+- `@midnight-ntwrk/midnight-js-types`
+- `@midnight-ntwrk/midnight-js-contracts`
+- `@midnight-ntwrk/midnight-js-http-client-proof-provider`
+- `@midnight-ntwrk/midnight-js-indexer-public-data-provider`
+- `@midnight-ntwrk/midnight-js-network-id`
 
 ## License
 
