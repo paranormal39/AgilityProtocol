@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agility Passport Wallet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn.danger {
+            background: #e74c3c;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+        }
+        
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .permission-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .permission-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .permission-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .risk-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .risk-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .risk-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            padding: 10px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .request-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .request-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .request-info p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Scan Screen -->
+        <div id="scan-screen" class="screen active">
+            <div class="card">
+                <div class="header">
+                    <div class="logo">AP</div>
+                    <h1>Agility Passport</h1>
+                    <p class="subtitle">Scan QR Code to begin</p>
+                </div>
+                
+                <div class="upload-area" id="upload-area">
+                    <div>📷</div>
+                    <p><strong>Click to upload QR image</strong></p>
+                    <p>or drag and drop</p>
+                    <input type="file" id="file-input" accept="image/*">
+                </div>
+                
+                <div class="btn secondary" onclick="simulateQR()">
+                    🔄 Use Demo QR Code
+                </div>
+            </div>
+        </div>
+        
+        <!-- Consent Screen -->
+        <div id="consent-screen" class="screen">
+            <div class="card">
+                <div class="header">
+                    <div class="logo">AP</div>
+                    <h1>Verification Request</h1>
+                </div>
+                
+                <div id="request-details"></div>
+                
+                <div id="permissions-list"></div>
+                
+                <div class="btn" onclick="approveRequest()">
+                    ✅ Approve
+                </div>
+                
+                <div class="btn danger" onclick="denyRequest()">
+                    ❌ Deny
+                </div>
+            </div>
+        </div>
+        
+        <!-- QR Display Screen -->
+        <div id="qr-display-screen" class="screen">
+            <div class="card">
+                <div class="header">
+                    <div class="logo">AP</div>
+                    <h1>Share Proof</h1>
+                    <p class="subtitle">Show this QR to verifier</p>
+                </div>
+                
+                <div class="timer" id="timer"></div>
+                
+                <div class="qr-display">
+                    <div class="qr-placeholder" id="qr-placeholder">
+                        Loading QR Code...
+                    </div>
+                </div>
+                
+                <div class="status success">
+                    ✓ Proof generated successfully
+                </div>
+                
+                <div class="btn secondary" onclick="resetWallet()">
+                    ← Back to Scan
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            decodeQRProofRequest, 
+            createQRProofResponse,
+            generateMockConsentGrant,
+            generateMockProof,
+            extractRequestMetadata,
+            canSatisfyRequest
+        } from '../qr/index.js';
+        
+        // Mock deck for demo
+        const mockDeck = {
+            age_over_18: true,
+            age_over_21: true,
+            order_paid: true,
+            shipping_address: true,
+            kyc_verified: true,
+            region_us: true
+        };
+        
+        let currentRequest = null;
+        let timerInterval = null;
+        
+        // File upload handling
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+        
+        function handleFileUpload(file) {
+            // In a real implementation, you would scan the QR code from the image
+            // For demo, we'll simulate with a mock QR string
+            console.log('File uploaded:', file.name);
+            simulateQR();
+        }
+        
+        window.simulateQR = function() {
+            // Simulate scanning a QR code for age verification
+            const mockQR = 'AQR1:eyJ0eXBlIjoicmVxdWVzdCIsImRhdGEiOnsicmVxdWVzdElkIjoiZGVtbzEyMzQ1IiwiYXVkaWVuY2UiOiJkZW1vLXZlcmlmaWVyLmNvbSIsInJlcXVpcmVkUGVybWlzc2lvbnMiOlsiYWdlX292ZXJfMTgiXSwibm9uY2UiOiJub25jZTEyMyIsImlzc3VlZEF0IjoxNzIyODU2MDAwMDAwLCJleHBpcmVzQXQiOjE3MjI4NTYzMDAwMDAsInByb3RvY29sVmVyc2lvbiI6IjEuMC4wIn0sInRpbWVzdGFtcCI6MTcyMjg1NjAwMDAwMCwidmVyc2lvbiI6IjEuMC4wIn0=';
+            
+            try {
+                currentRequest = decodeQRProofRequest(mockQR);
+                showConsentScreen();
+            } catch (error) {
+                showStatus('error', 'Invalid QR code: ' + error.message);
+            }
+        };
+        
+        function showConsentScreen() {
+            const metadata = extractRequestMetadata(currentRequest);
+            const canSatisfy = canSatisfyRequest(currentRequest, mockDeck);
+            
+            // Build request details HTML
+            const requestDetails = document.getElementById('request-details');
+            requestDetails.innerHTML = `
+                <div class="request-info">
+                    <h3>${metadata.title}</h3>
+                    <p><strong>From:</strong> ${currentRequest.audience}</p>
+                    <p><strong>Request ID:</strong> ${currentRequest.requestId}</p>
+                    <p>${metadata.description}</p>
+                    <span class="risk-badge risk-${metadata.riskLevel}">
+                        Risk Level: ${metadata.riskLevel.toUpperCase()}
+                    </span>
+                </div>
+            `;
+            
+            // Build permissions list HTML
+            const permissionsList = document.getElementById('permissions-list');
+            permissionsList.innerHTML = metadata.permissions.map(perm => `
+                <div class="permission-item">
+                    <div class="permission-name">${perm.name}</div>
+                    <div class="permission-desc">${perm.description}</div>
+                </div>
+            `).join('');
+            
+            // Show screen
+            showScreen('consent-screen');
+        }
+        
+        window.approveRequest = function() {
+            if (!currentRequest) return;
+            
+            try {
+                // Generate mock consent grant and proof
+                const grant = generateMockConsentGrant(currentRequest);
+                const proof = generateMockProof(currentRequest, mockDeck);
+                
+                // Create QR response
+                const responseQR = createQRProofResponse({
+                    request: currentRequest,
+                    grant,
+                    proof
+                });
+                
+                // Show QR display
+                showQRDisplay(responseQR);
+                
+            } catch (error) {
+                showStatus('error', 'Failed to generate proof: ' + error.message);
+            }
+        };
+        
+        window.denyRequest = function() {
+            showStatus('info', 'Request denied');
+            setTimeout(resetWallet, 2000);
+        };
+        
+        function showQRDisplay(qrString) {
+            const placeholder = document.getElementById('qr-placeholder');
+            placeholder.textContent = qrString.substring(0, 100) + '...';
+            
+            // Start countdown timer
+            const expiresAt = currentRequest.expiresAt;
+            startTimer(expiresAt);
+            
+            showScreen('qr-display-screen');
+        }
+        
+        function startTimer(expiresAt) {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+                const remaining = Math.max(0, expiresAt - now);
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                
+                const timerElement = document.getElementById('timer');
+                if (remaining > 0) {
+                    timerElement.textContent = `Expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    timerElement.textContent = 'Expired';
+                    clearInterval(timerInterval);
+                    setTimeout(resetWallet, 2000);
+                }
+            }, 1000);
+        }
+        
+        window.resetWallet = function() {
+            if (timerInterval) clearInterval(timerInterval);
+            currentRequest = null;
+            showScreen('scan-screen');
+        };
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+        
+        function showStatus(type, message) {
+            // Create temporary status message
+            const status = document.createElement('div');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.position = 'fixed';
+            status.style.top = '20px';
+            status.style.left = '50%';
+            status.style.transform = 'translateX(-50%)';
+            status.style.zIndex = '1000';
+            
+            document.body.appendChild(status);
+            
+            setTimeout(() => {
+                document.body.removeChild(status);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

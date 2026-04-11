@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Verification Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-radius: 20px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .verification-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .type-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .type-btn:hover {
+            border-color: #e74c3c;
+            background: #fff5f5;
+        }
+        
+        .type-btn.active {
+            border-color: #e74c3c;
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .type-btn .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .type-btn .label {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .type-btn .desc {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .qr-placeholder {
+            width: 250px;
+            height: 250px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #666;
+            word-break: break-all;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn.success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #e74c3c;
+        }
+        
+        .upload-area.dragover {
+            border-color: #e74c3c;
+            background: #fff5f5;
+        }
+        
+        .result {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .result.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        
+        .verification-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .detail-value {
+            color: #666;
+        }
+        
+        .permission-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .permission-granted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .permission-denied {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        .step.active {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .step.completed {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: #ddd;
+            align-self: center;
+        }
+        
+        .step-line.completed {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">🔞</div>
+                <h1>Age Verification</h1>
+                <p class="subtitle">QR-based identity verification system</p>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step active" id="step1">1</div>
+                <div class="step-line" id="line1"></div>
+                <div class="step" id="step2">2</div>
+                <div class="step-line" id="line2"></div>
+                <div class="step" id="step3">3</div>
+            </div>
+            
+            <!-- Step 1: Select Verification Type -->
+            <div id="step1-content">
+                <div class="instructions">
+                    <h3>How it works:</h3>
+                    <ol>
+                        <li>Select age verification type (18+ or 21+)</li>
+                        <li>Show the QR code to user</li>
+                        <li>Scan their response QR code</li>
+                        <li>Receive instant verification result</li>
+                    </ol>
+                </div>
+                
+                <h3 style="margin-bottom: 15px; color: #333;">Select Verification Type:</h3>
+                
+                <div class="verification-type">
+                    <div class="type-btn" onclick="selectVerification('over_18')" id="btn-18">
+                        <div class="icon">🍺</div>
+                        <div class="label">18+</div>
+                        <div class="desc">Standard age verification</div>
+                    </div>
+                    
+                    <div class="type-btn" onclick="selectVerification('over_21')" id="btn-21">
+                        <div class="icon">🍷</div>
+                        <div class="label">21+</div>
+                        <div class="desc">Restricted age verification</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Show QR Code -->
+            <div id="step2-content" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #333; text-align: center;">
+                    Show this QR to the user
+                </h3>
+                
+                <div class="qr-display">
+                    <div class="qr-placeholder" id="request-qr">
+                        Generating QR code...
+                    </div>
+                </div>
+                
+                <div class="btn success" onclick="proceedToScan()">
+                    ✓ User Scanned - Continue
+                </div>
+                
+                <div class="btn secondary" onclick="resetVerification()">
+                    ← Start Over
+                </div>
+            </div>
+            
+            <!-- Step 3: Scan Response -->
+            <div id="step3-content" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #333; text-align: center;">
+                    Scan user's response QR code
+                </h3>
+                
+                <div class="upload-area" id="response-upload-area">
+                    <div>📷</div>
+                    <p><strong>Click to upload response QR</strong></p>
+                    <p>or drag and drop</p>
+                    <input type="file" id="response-file-input" accept="image/*">
+                </div>
+                
+                <div class="btn secondary" onclick="simulateResponse()">
+                    🔄 Use Demo Response
+                </div>
+                
+                <div id="verification-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            createQRProofRequest, 
+            decodeQRProofRequest,
+            decodeQRProofResponse,
+            verifyQRProofResponse
+        } from '../qr/index.js';
+        
+        let currentRequest = null;
+        let selectedVerification = null;
+        
+        // Response upload handling
+        const responseUploadArea = document.getElementById('response-upload-area');
+        const responseFileInput = document.getElementById('response-file-input');
+        
+        responseUploadArea.addEventListener('click', () => responseFileInput.click());
+        
+        responseUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            responseUploadArea.classList.add('dragover');
+        });
+        
+        responseUploadArea.addEventListener('dragleave', () => {
+            responseUploadArea.classList.remove('dragover');
+        });
+        
+        responseUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            responseUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleResponseUpload(files[0]);
+            }
+        });
+        
+        responseFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleResponseUpload(e.target.files[0]);
+            }
+        });
+        
+        function handleResponseUpload(file) {
+            // In a real implementation, you would scan the QR code from the image
+            console.log('Response file uploaded:', file.name);
+            simulateResponse();
+        }
+        
+        window.selectVerification = function(type) {
+            selectedVerification = type;
+            
+            // Update UI
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`btn-${type === 'over_18' ? '18' : '21'}`).classList.add('active');
+            
+            // Generate QR request
+            generateQRRequest(type);
+        };
+        
+        function generateQRRequest(type) {
+            const permissions = type === 'over_18' ? ['age_over_18'] : ['age_over_21'];
+            
+            try {
+                const requestQR = createQRProofRequest({
+                    audience: 'age-verifier-demo.com',
+                    requiredPermissions: permissions,
+                    protocolVersion: '1.0.0',
+                    metadata: {
+                        verificationType: type,
+                        purpose: 'Age verification for restricted access'
+                    }
+                });
+                
+                currentRequest = decodeQRProofRequest(requestQR);
+                
+                // Show QR
+                document.getElementById('request-qr').textContent = requestQR.substring(0, 150) + '...';
+                
+                // Move to step 2
+                showStep(2);
+                
+            } catch (error) {
+                showResult('error', 'Failed to generate QR request: ' + error.message);
+            }
+        }
+        
+        window.proceedToScan = function() {
+            if (!currentRequest) return;
+            showStep(3);
+        };
+        
+        window.simulateResponse = function() {
+            if (!currentRequest) {
+                showResult('error', 'No active request found');
+                return;
+            }
+            
+            // Simulate a valid response QR
+            const mockResponseQR = 'AQR1:eyJ0eXBlIjoicmVzcG9uc2UiLCJkYXRhIjp7InJlcXVlc3RJZCI6ImRlbW8xMjM0NSIsImF1ZGllbmNlIjoiYWdlLXZlcmlmaWVyLWRlbW8uY29tIiwibm9uY2UiOiJub25jZTEyMyIsInNhdGlzZmllZFBlcm1pc3Npb25zIjpbImFnZV9vdmVyXzE4Il0sInJlcXVlc3RIYXNoIjoiYWJjZGVmMTIzNDU2IiwiaXNzdWVkQXQiOjE3MjI4NTYwMTAwMDAsImV4cGlyZXNBdCI6MTcyMjg1NjMxMDAwMCwiZ3JhbnQiOnsiaWQiOiJncmFudDEyMyIsInJlcXVlc3RJZCI6ImRlbW8xMjM0NSIsImF1ZGllbmNlIjoiYWdlLXZlcmlmaWVyLWRlbW8uY29tIiwicGVybWlzc2lvbnMiOlsiYWdlX292ZXJfMTgiXSwiaXNzdWVkQXQiOjE3MjI4NTYwMTAwMDAsImV4cGlyZXNBdCI6MTcyMjg1NjMxMDAwMCwic3RhdHVzIjoiYWN0aXZlIn0sInByb29mIjp7InByb29mSWQiOiJwcm9vZjEyMyIsInJlcXVlc3RJZCI6ImRlbW8xMjM0NSIsInNhdGlzZmllZFBlcm1pc3Npb25zIjpbImFnZV9vdmVyXzE4Il0sImV2aWRlbmNlIjpbeyJwZXJtaXNzaW9uIjoiYWdlX292ZXJfMTgiLCJ0eXBlIjoibW9jayIsInZhbGlkIjp0cnVlLCJzb3VyY2UiOiJkZW1vLWRlY2sifV0sImlzc3VlZEF0IjoxNzIyODU2MDEwMDAwLCJleHBpcmVzQXQiOjE3MjI4NTYzMTAwMDB9fSwidGltZXN0YW1wIjoxNzIyODU2MDEwMDAwLCJ2ZXJzaW9uIjoiMS4wLjAifQ==';
+            
+            processResponse(mockResponseQR);
+        };
+        
+        function processResponse(responseQR) {
+            try {
+                showResult('pending', 'Verifying response...');
+                
+                const response = decodeQRProofResponse(responseQR);
+                const verification = verifyQRProofResponse(currentRequest, responseQR);
+                
+                if (verification.valid) {
+                    showResult('success', `✓ VERIFIED: ${selectedVerification.toUpperCase()}`);
+                    showVerificationDetails(response);
+                    completeVerification();
+                } else {
+                    showResult('error', `✗ Verification failed: ${verification.errors.join(', ')}`);
+                }
+                
+            } catch (error) {
+                showResult('error', 'Invalid response QR: ' + error.message);
+            }
+        }
+        
+        function showVerificationDetails(response) {
+            const detailsDiv = document.getElementById('verification-result');
+            
+            const permissionsHtml = response.satisfiedPermissions.map(perm => 
+                `<span class="permission-badge permission-granted">${perm}</span>`
+            ).join('');
+            
+            detailsDiv.innerHTML = `
+                <div class="verification-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Request ID:</span>
+                        <span class="detail-value">${response.requestId}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Audience:</span>
+                        <span class="detail-value">${response.audience}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Permissions:</span>
+                        <span class="detail-value">${permissionsHtml}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Verified At:</span>
+                        <span class="detail-value">${new Date(response.issuedAt).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('verification-result');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        function showStep(stepNumber) {
+            // Hide all step contents
+            document.getElementById('step1-content').style.display = 'none';
+            document.getElementById('step2-content').style.display = 'none';
+            document.getElementById('step3-content').style.display = 'none';
+            
+            // Show current step
+            document.getElementById(`step${stepNumber}-content`).style.display = 'block';
+            
+            // Update step indicators
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (i < stepNumber) {
+                    stepEl.className = 'step completed';
+                } else if (i === stepNumber) {
+                    stepEl.className = 'step active';
+                } else {
+                    stepEl.className = 'step';
+                }
+            }
+            
+            // Update lines
+            for (let i = 1; i <= 2; i++) {
+                const lineEl = document.getElementById(`line${i}`);
+                if (i < stepNumber) {
+                    lineEl.className = 'step-line completed';
+                } else {
+                    lineEl.className = 'step-line';
+                }
+            }
+        }
+        
+        function completeVerification() {
+            // Mark step 3 as completed after a delay
+            setTimeout(() => {
+                document.getElementById('step3').className = 'step completed';
+                document.getElementById('line2').className = 'step-line completed';
+            }, 1000);
+        }
+        
+        window.resetVerification = function() {
+            currentRequest = null;
+            selectedVerification = null;
+            
+            // Reset UI
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById('verification-result').innerHTML = '';
+            
+            showStep(1);
+        };
+    </script>
+</body>
+</html>

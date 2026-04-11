@@ -1,6 +1,6 @@
 {
   "name": "@agility-protocol/headless",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Agility Protocol - Privacy-preserving identity verification SDK",
   "type": "module",
   "main": "dist/index.js",
@@ -63,5 +63,17 @@
     "@types/node": "^22.13.4",
     "@types/uuid": "^9.0.0",
     "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "react-native-nfc-manager": ">=3.14.0",
+    "expo-local-authentication": ">=13.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native-nfc-manager": {
+      "optional": true
+    },
+    "expo-local-authentication": {
+      "optional": true
+    }
   }
 }

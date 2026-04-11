@@ -20,6 +20,9 @@ export * from './lace/index.js';
 // KYC + Payment bundle
 export * from './bundle/index.js';
 
+// ZK Proof circuits
+export * from './proofs/index.js';
+
 // Convenience re-exports
 export {
   createXrplPaymentAdapter,

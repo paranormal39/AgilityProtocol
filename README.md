@@ -1,6 +1,6 @@
 # Agility Protocol
 
-**Protocol Version: 1.0** | **127+ Tests** | **TypeScript** | **Multi-Chain**
+**Protocol Version: 1.0** | **127+ Tests** | **TypeScript** | **Multi-Chain** | **Biometrics** | **NFC**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -12,9 +12,17 @@ Agility is a **privacy-preserving identity verification and payment protocol** t
 
 | Network | Payments | ZK Proofs | Wallet |
 |---------|----------|-----------|--------|
-| **XRPL** | ✅ | - | XUMM |
+| **XRPL** | ✅ | ✅ (via Midnight) | XUMM |
 | **Midnight** | ✅ | ✅ | Lace |
-| **Cardano** | ✅ | ⚠️ | Lace |
+| **Cardano** | ✅ | ✅ (via Midnight) | Lace |
+
+### Platform Support
+
+| Feature | Web | iOS | Android |
+|---------|-----|-----|--------|
+| **Biometrics** | WebAuthn | Face ID / Touch ID | Fingerprint / Face |
+| **NFC** | Chrome Android | Core NFC | Full NFC |
+| **QR Codes** | ✅ | ✅ | ✅ |
 
 The protocol uses a simple three-message flow:
 
@@ -35,6 +43,8 @@ Verifier                          Prover (Wallet)
 - **Pairwise DIDs** — Unique identifier per application prevents tracking
 - **Replay-Resistant** — Nonce + expiry + replay cache prevent proof reuse
 - **Chain-Agnostic** — Optional anchoring on XRPL or Cardano
+- **Biometric Auth** — Face ID, Touch ID, Fingerprint for secure consent
+- **NFC Support** — Tap-to-verify and tap-to-pay alongside QR
 
 ## Quick Start
 
@@ -183,7 +193,16 @@ The protocol performs these checks in order:
 │   ├── xrpl/               # XRPL payment adapter
 │   ├── midnight/           # Midnight ZK payment adapter
 │   ├── lace/               # Lace wallet adapter
-│   └── bundle/             # KYC + Payment bundling
+│   ├── bundle/             # KYC + Payment bundling
+│   └── proofs/             # ZK proof circuits (payment, order, identity)
+│
+├── agility-auth/           # Authentication module
+│   └── biometrics/         # Face ID, Touch ID, WebAuthn
+│
+├── agility-nfc/            # NFC module
+│   ├── core/               # Types and payload encoding
+│   ├── web/                # Web NFC adapter (Chrome Android)
+│   └── native/             # React Native adapter
 │
 └── docs/                   # Documentation
 ```
@@ -246,6 +265,80 @@ npm run test:phase1 # Security hardening tests
 npm run test:phase6 # Forward compatibility tests
 ```
 
+## Biometric Authentication
+
+```typescript
+import { createBiometricManager } from '@agility-protocol/headless/agility-auth';
+
+const biometric = createBiometricManager();
+await biometric.initialize();
+
+// Authenticate for payment approval
+const result = await biometric.authenticate({
+  reason: 'Approve payment of 50 XRP',
+  requireConfirmation: true,
+});
+
+if (result.success) {
+  console.log('Authenticated with:', result.method); // 'faceId', 'touchId', 'fingerprint'
+}
+```
+
+## NFC Support
+
+```typescript
+import { createWebNFCAdapter, createPaymentRequestPayload } from '@agility-protocol/headless/agility-nfc';
+
+const nfc = createWebNFCAdapter();
+
+// Read NFC tag
+nfc.onTagDiscovered((result) => {
+  if (result.success) {
+    console.log('Payload:', result.payload);
+  }
+});
+await nfc.startReading();
+
+// Write payment request to NFC tag
+const payload = createPaymentRequestPayload({
+  paymentId: 'pay-123',
+  merchantId: 'shop-456',
+  amount: '50.00',
+  currency: 'XRP',
+  network: 'xrpl',
+  destinationAddress: 'rMerchant...',
+  expiresAt: Date.now() + 5 * 60 * 1000,
+});
+await nfc.writeTag(payload);
+```
+
+## ZK Proof Circuits
+
+```typescript
+import { 
+  provePaymentMade,
+  proveAgeOver,
+  proveOrderPlaced 
+} from '@agility-protocol/headless/agility-payments';
+
+// Prove payment without revealing amount
+const paymentProof = await provePaymentMade(
+  'pay-123',
+  'rMerchant...',
+  '150.00'  // Actual amount (private)
+);
+
+// Prove age > 21 without revealing DOB
+const ageProof = await proveAgeOver('1990-05-15', 21);
+
+// Prove order exists without revealing items
+const orderProof = await proveOrderPlaced(
+  'ORD-123',
+  'merchant-456',
+  [{ sku: 'WINE-001', name: 'Red Wine', price: 45.99, quantity: 2 }]
+);
+```
+
 ## Midnight.js Integration
 
 This SDK integrates with official Midnight.js packages (v4.0.2):
@@ -255,6 +348,18 @@ This SDK integrates with official Midnight.js packages (v4.0.2):
 - `@midnight-ntwrk/midnight-js-http-client-proof-provider`
 - `@midnight-ntwrk/midnight-js-indexer-public-data-provider`
 - `@midnight-ntwrk/midnight-js-network-id`
+
+## Optional Peer Dependencies
+
+For React Native mobile apps:
+
+```bash
+# NFC support
+npm install react-native-nfc-manager
+
+# Biometric authentication
+npm install expo-local-authentication
+```
 
 ## License
 

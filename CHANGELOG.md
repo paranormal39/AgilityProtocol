@@ -5,6 +5,38 @@ All notable changes to the Agility Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-11
+
+### Added
+
+#### Biometric Authentication (`agility-auth/`)
+- Face ID / Touch ID support (iOS)
+- Fingerprint / Face Unlock support (Android)
+- WebAuthn support (Browser)
+- Secure storage with biometric protection
+- Consent signing with biometric attestation
+
+#### NFC Support (`agility-nfc/`)
+- Web NFC adapter (Chrome Android)
+- React Native NFC adapter
+- Tap-to-verify and tap-to-pay flows
+- NFC payload encoding/decoding
+- Dual mode (QR + NFC) transport
+
+#### ZK Proof Circuits (`agility-payments/proofs/`)
+- Payment proof circuits (payment_made, payment_sufficient, payment_range)
+- Order proof circuits (order_placed, order_value_range, order_contains_type)
+- Identity proof circuits (age_over, age_range, identity_verified, country_residence)
+- Selective disclosure proofs
+- Proof composition support
+
+### Changed
+- Updated README with biometrics, NFC, and ZK proofs documentation
+- Added optional peer dependencies for React Native (react-native-nfc-manager, expo-local-authentication)
+- Enhanced project structure documentation
+
+---
+
 ## [1.0.0] - 2026-02-20
 
 ### Initial Formal Release
@@ -74,12 +106,14 @@ This is the first stable release of the Agility Protocol, completing Phases 1-6.
 
 ## Future Roadmap
 
-### [1.1.0] - Planned
-- Midnight ZK proof integration
+### [1.2.0] - Planned
+- XRPL-Midnight cross-chain bridge
+- Cross-chain transaction hash anchoring
+- XRPL escrow and multi-sig support
 - Enhanced credential revocation
-- Multi-chain anchoring
 
 ### [2.0.0] - Planned
 - Breaking schema changes (if needed)
 - Advanced privacy features
 - Production hardening
+- Mobile app templates

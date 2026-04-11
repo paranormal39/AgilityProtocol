@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Demo - Split Knowledge Delivery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 20px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .delivery-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .delivery-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .delivery-status {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-active {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .delivery-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .info-value {
+            color: #666;
+        }
+        
+        .address-display {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px dashed #27ae60;
+        }
+        
+        .address-label {
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .address-text {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .route-info {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .qr-display {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #666;
+            word-break: break-all;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn.success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #ff6b6b;
+        }
+        
+        .upload-area.dragover {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+        }
+        
+        .result {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        
+        .verification-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .detail-value {
+            color: #666;
+        }
+        
+        .permission-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .permission-granted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        .privacy-notice {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .privacy-notice h3 {
+            color: #f57c00;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .privacy-notice p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+        
+        .step.active {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .step.completed {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: #ddd;
+            align-self: center;
+        }
+        
+        .step-line.completed {
+            background: #27ae60;
+        }
+        
+        .delivery-instructions {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .delivery-instructions h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .delivery-instructions ul {
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .delivery-instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .map-placeholder {
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">🚚</div>
+                <h1>Courier Portal</h1>
+                <p class="subtitle">Split-knowledge delivery system</p>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step active" id="step1">1</div>
+                <div class="step-line" id="line1"></div>
+                <div class="step" id="step2">2</div>
+                <div class="step-line" id="line2"></div>
+                <div class="step" id="step3">3</div>
+            </div>
+            
+            <!-- Delivery Assignment -->
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <div class="delivery-id">Delivery: DEL-2024-001</div>
+                    <div class="delivery-status status-pending" id="delivery-status">Pending Address</div>
+                </div>
+                <div class="delivery-info">
+                    <div class="info-row">
+                        <span class="info-label">Merchant:</span>
+                        <span class="info-value">Demo Store</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Order Verified:</span>
+                        <span class="info-value">✅ Yes</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Customer Age:</span>
+                        <span class="info-value">✅ Verified (18+)</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Payment:</span>
+                        <span class="info-value">✅ Confirmed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Awaiting Address -->
+            <div id="step1-content">
+                <div class="instructions">
+                    <h3>📦 Delivery Assignment</h3>
+                    <p>You have been assigned a delivery from Demo Store. The merchant has verified the customer's order and age, but you need to collect the delivery address separately.</p>
+                    <p><strong>Privacy Note:</strong> You will only see delivery information - no order details, payment information, or personal identity data.</p>
+                </div>
+                
+                <div class="privacy-notice">
+                    <h3>🔒 Privacy Protection</h3>
+                    <p>This split-knowledge system ensures:</p>
+                    <p>• You only receive delivery address and instructions</p>
+                    <p>• No access to order contents or payment details</p>
+                    <p>• Customer privacy is protected throughout</p>
+                </div>
+                
+                <div class="btn" onclick="requestAddress()">
+                    📍 Request Delivery Address
+                </div>
+            </div>
+            
+            <!-- Step 2: Show QR Code -->
+            <div id="step2-content" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #333; text-align: center;">
+                    Show this QR to the customer
+                </h3>
+                
+                <div class="qr-display">
+                    <div class="qr-placeholder" id="request-qr">
+                        Generating QR code...
+                    </div>
+                </div>
+                
+                <div class="btn success" onclick="proceedToScan()">
+                    ✓ Customer Scanned - Continue
+                </div>
+                
+                <div class="btn secondary" onclick="resetDelivery()">
+                    ← Cancel Delivery
+                </div>
+            </div>
+            
+            <!-- Step 3: Scan Response -->
+            <div id="step3-content" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #333; text-align: center;">
+                    Scan customer's address QR
+                </h3>
+                
+                <div class="upload-area" id="response-upload-area">
+                    <div>📷</div>
+                    <p><strong>Click to upload address QR</strong></p>
+                    <p>or drag and drop</p>
+                    <input type="file" id="response-file-input" accept="image/*">
+                </div>
+                
+                <div class="btn secondary" onclick="simulateResponse()">
+                    🔄 Use Demo Address
+                </div>
+                
+                <div id="verification-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            createQRProofRequest, 
+            decodeQRProofRequest,
+            decodeQRProofResponse,
+            verifyQRProofResponse
+        } from '../qr/index.js';
+        
+        let currentRequest = null;
+        let deliveryReady = false;
+        
+        // Response upload handling
+        const responseUploadArea = document.getElementById('response-upload-area');
+        const responseFileInput = document.getElementById('response-file-input');
+        
+        responseUploadArea.addEventListener('click', () => responseFileInput.click());
+        
+        responseUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            responseUploadArea.classList.add('dragover');
+        });
+        
+        responseUploadArea.addEventListener('dragleave', () => {
+            responseUploadArea.classList.remove('dragover');
+        });
+        
+        responseUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            responseUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleResponseUpload(files[0]);
+            }
+        });
+        
+        responseFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleResponseUpload(e.target.files[0]);
+            }
+        });
+        
+        function handleResponseUpload(file) {
+            console.log('Response file uploaded:', file.name);
+            simulateResponse();
+        }
+        
+        window.requestAddress = function() {
+            // Generate QR request for delivery address
+            generateAddressQR();
+        };
+        
+        function generateAddressQR() {
+            try {
+                const requestQR = createQRProofRequest({
+                    audience: 'courier-demo.com',
+                    requiredPermissions: ['shipping_address'],
+                    protocolVersion: '1.0.0',
+                    metadata: {
+                        deliveryId: 'DEL-2024-001',
+                        courier: 'Demo Courier Service',
+                        merchant: 'Demo Store'
+                    }
+                });
+                
+                currentRequest = decodeQRProofRequest(requestQR);
+                
+                // Show QR
+                document.getElementById('request-qr').textContent = requestQR.substring(0, 150) + '...';
+                
+                // Move to step 2
+                showStep(2);
+                
+            } catch (error) {
+                showResult('error', 'Failed to generate QR request: ' + error.message);
+            }
+        }
+        
+        window.proceedToScan = function() {
+            if (!currentRequest) return;
+            showStep(3);
+        };
+        
+        window.simulateResponse = function() {
+            if (!currentRequest) {
+                showResult('error', 'No active request found');
+                return;
+            }
+            
+            // Simulate a valid response QR with delivery address
+            const mockResponseQR = 'AQR1:eyJ0eXBlIjoicmVzcG9uc2UiLCJkYXRhIjp7InJlcXVlc3RJZCI6ImRlbGl2ZXJ5MTIzNDUiLCJhdWRpZW5jZSI6ImNvdXJpZXItZGVtby5jb20iLCJub25jZSI6ImRlbGl2ZXJ5bm9uY2UiLCJzYXRpc2ZpZWRQZXJtaXNzaW9ucyI6WyJzaGlwcGluZ19hZGRyZXNzIl0sInJlcXVlc3RIYXNoIjoiZGVsaXZlcnloYXNoMTIzIiwiaXNzdWVkQXQiOjE3MjI4NTYwMzAwMDAsImV4cGlyZXNBdCI6MTcyMjg1NjMzMDAwMCwiZ3JhbnQiOnsiaWQiOiJkZWxpdmVyeWdyYW50MTIzIiwicmVxdWVzdElkIjoiZGVsaXZlcnkxMjM0NSIsImF1ZGllbmNlIjoiY291cmllci1kZW1vLmNvbSIsInBlcm1pc3Npb25zIjpbInNoaXBwaW5nX2FkZHJlc3MiXSwiaXNzdWVkQXQiOjE3MjI4NTYwMzAwMDAsImV4cGlyZXNBdCI6MTcyMjg1NjMzMDAwMCwic3RhdHVzIjoiYWN0aXZlIn0sInByb29mIjp7InByb29mSWQiOiJkZWxpdmVyeXByb29mMTIzIiwicmVxdWVzdElkIjoiZGVsaXZlcnkxMjM0NSIsInNhdGlzZmllZFBlcm1pc3Npb25zIjpbInNoaXBwaW5nX2FkZHJlc3MiXSwiZXZpZGVuY2UiOlt7InBlcm1pc3Npb24iOiJzaGlwcGluZ19hZGRyZXNzIiwidHlwZSI6Im1vY2siLCJ2YWxpZCI6dHJ1ZSwic291cmNlIjoic2hpcHBpbmctZGVjayJ9XSwiaXNzdWVkQXQiOjE3MjI4NTYwMzAwMDAsImV4cGlyZXNBdCI6MTcyMjI4NTYzMzAwMDB9fSwidGltZXN0YW1wIjoxNzIyODU2MDMwMDAwLCJ2ZXJzaW9uIjoiMS4wLjAifQ==';
+            
+            processResponse(mockResponseQR);
+        };
+        
+        function processResponse(responseQR) {
+            try {
+                showResult('info', 'Verifying delivery address...');
+                
+                const response = decodeQRProofResponse(responseQR);
+                const verification = verifyQRProofResponse(currentRequest, responseQR);
+                
+                if (verification.valid) {
+                    deliveryReady = true;
+                    showResult('success', '✅ Delivery Address Received');
+                    updateDeliveryStatus();
+                    showDeliveryDetails();
+                    completeVerification();
+                } else {
+                    showResult('error', `❌ Verification failed: ${verification.errors.join(', ')}`);
+                }
+                
+            } catch (error) {
+                showResult('error', 'Invalid response QR: ' + error.message);
+            }
+        }
+        
+        function updateDeliveryStatus() {
+            document.getElementById('delivery-status').textContent = 'Ready for Delivery';
+            document.getElementById('delivery-status').className = 'delivery-status status-active';
+        }
+        
+        function showDeliveryDetails() {
+            const detailsDiv = document.getElementById('verification-result');
+            
+            detailsDiv.innerHTML = `
+                <div class="address-display">
+                    <div class="address-label">📍 Delivery Address</div>
+                    <div class="address-text">
+                        123 Main Street, Apt 4B<br>
+                        San Francisco, CA 94102<br>
+                        United States
+                    </div>
+                    <div class="route-info">
+                        🚚 Route: A12 - Estimated 25 minutes
+                    </div>
+                </div>
+                
+                <div class="delivery-instructions">
+                    <h4>📋 Delivery Instructions</h4>
+                    <ul>
+                        <li>Leave package at front door</li>
+                        <li>Customer prefers contactless delivery</li>
+                        <li>Ring doorbell upon arrival</li>
+                        <li>Take photo of delivered package</li>
+                    </ul>
+                </div>
+                
+                <div class="map-placeholder">
+                    🗺️ Delivery route map would be displayed here
+                </div>
+                
+                <div class="verification-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Delivery ID:</span>
+                        <span class="detail-value">DEL-2024-001</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address Verified:</span>
+                        <span class="detail-value">✅ Confirmed</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Permission:</span>
+                        <span class="detail-value">
+                            <span class="permission-badge permission-granted">shipping_address</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Received At:</span>
+                        <span class="detail-value">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>
+                
+                <div class="btn success" onclick="startDelivery()">
+                    🚀 Start Delivery
+                </div>
+                
+                <div class="btn secondary" onclick="contactCustomer()">
+                    📞 Contact Customer
+                </div>
+            `;
+        }
+        
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('verification-result');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        function showStep(stepNumber) {
+            // Hide all step contents
+            document.getElementById('step1-content').style.display = 'none';
+            document.getElementById('step2-content').style.display = 'none';
+            document.getElementById('step3-content').style.display = 'none';
+            
+            // Show current step
+            document.getElementById(`step${stepNumber}-content`).style.display = 'block';
+            
+            // Update step indicators
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (i < stepNumber) {
+                    stepEl.className = 'step completed';
+                } else if (i === stepNumber) {
+                    stepEl.className = 'step active';
+                } else {
+                    stepEl.className = 'step';
+                }
+            }
+            
+            // Update lines
+            for (let i = 1; i <= 2; i++) {
+                const lineEl = document.getElementById(`line${i}`);
+                if (i < stepNumber) {
+                    lineEl.className = 'step-line completed';
+                } else {
+                    lineEl.className = 'step-line';
+                }
+            }
+        }
+        
+        function completeVerification() {
+            setTimeout(() => {
+                document.getElementById('step3').className = 'step completed';
+                document.getElementById('line2').className = 'step-line completed';
+            }, 1000);
+        }
+        
+        window.startDelivery = function() {
+            if (deliveryReady) {
+                document.getElementById('delivery-status').textContent = 'In Transit';
+                document.getElementById('delivery-status').className = 'delivery-status status-active';
+                
+                showResult('success', '🚚 Delivery started! Navigate to address.');
+                
+                // In a real system, this would:
+                // - Start GPS navigation
+                // - Update delivery tracking
+                // - Notify customer of ETA
+            }
+        };
+        
+        window.contactCustomer = function() {
+            if (deliveryReady) {
+                alert('Customer contact: +1-555-0123\n\nIn a real system, this would open a secure messaging interface or initiate a call through the platform.');
+            }
+        };
+        
+        window.resetDelivery = function() {
+            currentRequest = null;
+            deliveryReady = false;
+            
+            // Reset status
+            document.getElementById('delivery-status').textContent = 'Pending Address';
+            document.getElementById('delivery-status').className = 'delivery-status status-pending';
+            
+            document.getElementById('verification-result').innerHTML = '';
+            
+            showStep(1);
+        };
+    </script>
+</body>
+</html>
