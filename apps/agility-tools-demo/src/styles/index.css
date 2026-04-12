@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #e5e7eb;
+  background-color: #0a0a0f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Panel card styles */
+.panel-card {
+  @apply rounded-xl p-4 border transition-all duration-300;
+  background: linear-gradient(145deg, rgba(26, 26, 37, 0.8), rgba(18, 18, 26, 0.9));
+  backdrop-filter: blur(10px);
+}
+
+.panel-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Role-specific borders */
+.panel-buyer {
+  @apply border-buyer/30;
+}
+.panel-buyer:hover {
+  @apply border-buyer/60 shadow-glow-blue;
+}
+
+.panel-merchant {
+  @apply border-merchant/30;
+}
+.panel-merchant:hover {
+  @apply border-merchant/60 shadow-glow-green;
+}
+
+.panel-courier {
+  @apply border-courier/30;
+}
+.panel-courier:hover {
+  @apply border-courier/60 shadow-glow-orange;
+}
+
+.panel-return {
+  @apply border-return/30;
+}
+.panel-return:hover {
+  @apply border-return/60 shadow-glow-purple;
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-buyer {
+  @apply bg-buyer/20 text-buyer border border-buyer/40 hover:bg-buyer/30 hover:border-buyer;
+}
+
+.btn-merchant {
+  @apply bg-merchant/20 text-merchant border border-merchant/40 hover:bg-merchant/30 hover:border-merchant;
+}
+
+.btn-courier {
+  @apply bg-courier/20 text-courier border border-courier/40 hover:bg-courier/30 hover:border-courier;
+}
+
+.btn-return {
+  @apply bg-return/20 text-return border border-return/40 hover:bg-return/30 hover:border-return;
+}
+
+/* Data section styles */
+.data-section {
+  @apply rounded-lg p-3 text-xs font-mono;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.data-visible {
+  @apply border-l-2 border-green-500/50;
+}
+
+.data-hidden {
+  @apply border-l-2 border-red-500/50;
+}
+
+/* QR container */
+.qr-container {
+  @apply rounded-lg p-3 flex items-center justify-center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Flow arrow */
+.flow-arrow {
+  @apply text-2xl text-gray-600 flex items-center justify-center;
+  min-width: 40px;
+}
+
+.flow-arrow.active {
+  @apply text-white animate-flow;
+}
+
+/* Output box */
+.output-box {
+  @apply rounded-lg p-3 text-xs font-mono overflow-auto max-h-32;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+}
+
+.badge-verified {
+  @apply bg-green-500/20 text-green-400 border border-green-500/30;
+}
+
+.badge-pending {
+  @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

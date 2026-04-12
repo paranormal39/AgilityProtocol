@@ -123,7 +123,36 @@ export XRPL_RPC_URL=https://s.altnet.rippletest.net:51234
 | `npm run demo:offline` | Full verification (no network) |
 | `npm run demo:xrpl` | XRPL consent verification |
 | `npm run demo:cardano` | Cardano signData verification |
+| `npm run demo:commerce` | **Private Commerce Demo** (visual selective disclosure) |
 | `npm run test:all` | Run all 127+ tests |
+
+### Private Commerce Demo
+
+Run the visual selective disclosure demo:
+
+```bash
+npm run demo:commerce
+```
+
+This launches a React app at http://localhost:3000 showing how 4 commerce roles (Buyer, Merchant, Courier, Return) each see only the data they need:
+
+```
+[ Buyer ]  →  [ Merchant ]  →  [ Courier ]  →  [ Return ]
+    │              │               │              │
+    │ Creates      │ Verifies      │ Scans QR     │ Generates
+    │ Order        │ Order         │ Unlocks      │ Return QR
+    │              │               │ Route        │
+    ▼              ▼               ▼              ▼
+  Full Data    Order Only     Route Only    Auth Only
+```
+
+**Demo Steps:**
+1. Click "Create Order" in Buyer panel
+2. Click "Verify Order" then "Generate Courier QR" in Merchant panel
+3. Click "Scan Courier QR" in Courier panel
+4. Click "Generate Return QR" in Return panel
+
+Each panel shows **Visible Data** (green) vs **Hidden Data** (red).
 
 ## CLI Commands
 

@@ -1,0 +1,321 @@
+/**
+ * Midnight Compact - Selective Disclosure for Commerce
+ * 
+ * This contract defines the ZK circuits for privacy-preserving
+ * commerce flows. Each role (buyer, merchant, courier, return)
+ * only sees what they need to see.
+ * 
+ * NOTE: This is a placeholder contract showing the structure.
+ * Actual deployment requires Midnight testnet setup.
+ * 
+ * @version 1.0.0
+ * @author Agility Protocol
+ */
+
+// ============================================
+// STATE DEFINITIONS
+// ============================================
+
+/**
+ * Private state - never revealed to any party
+ * Stored encrypted on Midnight
+ */
+ledger private_state {
+  // Buyer identity (never revealed)
+  buyer_identity: Bytes32;
+  buyer_name: String;
+  buyer_email: String;
+  buyer_phone: String;
+  
+  // Full address (never revealed to merchant)
+  full_address: {
+    street: String;
+    apartment: String;
+    city: String;
+    state: String;
+    zip: String;
+    country: String;
+  };
+  
+  // Payment details (never revealed)
+  wallet_address: Bytes32;
+  transaction_hash: Bytes32;
+  payment_amount: Uint64;
+  
+  // Order items (hidden from courier)
+  order_items: Array<{
+    sku: String;
+    name: String;
+    price: Uint64;
+    quantity: Uint32;
+  }>;
+}
+
+/**
+ * Public state - selectively revealed per role
+ */
+ledger public_state {
+  // Order identifiers
+  order_token: String;
+  route_token: String;
+  return_token: String;
+  
+  // Status flags
+  payment_valid: Bool;
+  shipping_authorized: Bool;
+  age_verified: Bool;
+  return_authorized: Bool;
+  
+  // Timestamps
+  created_at: Uint64;
+  expires_at: Uint64;
+}
+
+// ============================================
+// CIRCUIT DEFINITIONS
+// ============================================
+
+/**
+ * Buyer View Circuit
+ * 
+ * The buyer sees everything (their own data).
+ * This circuit proves ownership without revealing to others.
+ */
+export circuit buyer_proof(
+  // Private inputs
+  witness buyer_identity: Bytes32,
+  witness order_items: Array<OrderItem>,
+  witness payment_details: PaymentDetails,
+  
+  // Public inputs
+  instance order_token: String,
+  instance timestamp: Uint64
+) -> BuyerProof {
+  // Verify buyer owns this order
+  assert(hash(buyer_identity, order_token) == stored_hash);
+  
+  // Return proof without revealing private data
+  return BuyerProof {
+    order_token: order_token,
+    proof_hash: hash(buyer_identity, timestamp),
+    verified: true
+  };
+}
+
+/**
+ * Merchant View Circuit
+ * 
+ * Merchant sees: order details, payment status
+ * Merchant CANNOT see: buyer identity, full address, wallet
+ */
+export circuit merchant_view(
+  // Private inputs (hidden from merchant)
+  witness buyer_identity: Bytes32,
+  witness full_address: Address,
+  witness wallet_address: Bytes32,
+  
+  // Public inputs (revealed to merchant)
+  instance order_token: String,
+  instance item_name: String,
+  instance quantity: Uint32,
+  instance payment_valid: Bool,
+  instance shipping_authorized: Bool
+) -> MerchantProof {
+  // Verify payment was made without revealing wallet
+  assert(verify_payment(wallet_address, payment_valid));
+  
+  // Verify shipping is authorized
+  assert(shipping_authorized == true);
+  
+  return MerchantProof {
+    order_token: order_token,
+    item: item_name,
+    quantity: quantity,
+    payment_verified: true,
+    shipping_ready: true,
+    // NOTE: buyer_identity, full_address, wallet NOT included
+  };
+}
+
+/**
+ * Courier View Circuit
+ * 
+ * Courier sees: destination coordinates, route token, instructions
+ * Courier CANNOT see: order items, buyer name, merchant details, price
+ */
+export circuit courier_view(
+  // Private inputs (hidden from courier)
+  witness order_items: Array<OrderItem>,
+  witness buyer_name: String,
+  witness merchant_id: String,
+  witness payment_amount: Uint64,
+  witness full_address: Address,
+  
+  // Public inputs (revealed to courier)
+  instance route_token: String,
+  instance destination_coords: String,  // GPS only, not full address
+  instance delivery_area: String,       // City/State only
+  instance instructions: String,
+  instance package_size: String
+) -> CourierProof {
+  // Verify route is valid
+  assert(verify_route(route_token, destination_coords));
+  
+  // Hash the full address to verify without revealing
+  let address_hash = hash(full_address);
+  assert(verify_destination(address_hash, destination_coords));
+  
+  return CourierProof {
+    route_token: route_token,
+    destination: destination_coords,
+    area: delivery_area,
+    instructions: instructions,
+    package_size: package_size,
+    // NOTE: order_items, buyer_name, merchant_id, payment NOT included
+  };
+}
+
+/**
+ * Return Authorization Circuit
+ * 
+ * Return flow sees: return authorization, return destination
+ * Return flow CANNOT see: original transaction, merchant address, buyer identity
+ */
+export circuit return_authorization(
+  // Private inputs (hidden from return flow)
+  witness original_transaction: Bytes32,
+  witness merchant_address: Address,
+  witness buyer_identity: Bytes32,
+  witness order_items: Array<OrderItem>,
+  
+  // Public inputs (revealed to return flow)
+  instance return_token: String,
+  instance return_authorized: Bool,
+  instance return_destination: String,
+  instance original_order_ref: String,  // Truncated reference only
+  instance return_window: String
+) -> ReturnProof {
+  // Verify return is authorized
+  assert(return_authorized == true);
+  
+  // Verify return window is valid
+  assert(verify_return_window(original_transaction, return_window));
+  
+  return ReturnProof {
+    return_token: return_token,
+    authorized: true,
+    destination: return_destination,
+    order_ref: original_order_ref,
+    // NOTE: original_transaction, merchant_address, buyer_identity NOT included
+  };
+}
+
+/**
+ * Age Verification Circuit
+ * 
+ * Proves age > threshold without revealing date of birth
+ */
+export circuit age_verification(
+  // Private inputs
+  witness date_of_birth: Date,
+  witness full_name: String,
+  witness id_number: String,
+  
+  // Public inputs
+  instance minimum_age: Uint32,
+  instance verification_date: Date
+) -> AgeProof {
+  // Calculate age without revealing DOB
+  let age = calculate_age(date_of_birth, verification_date);
+  
+  // Verify age meets minimum
+  assert(age >= minimum_age);
+  
+  return AgeProof {
+    age_verified: true,
+    minimum_met: minimum_age,
+    // NOTE: date_of_birth, full_name, id_number NOT included
+  };
+}
+
+// ============================================
+// HELPER TYPES
+// ============================================
+
+type OrderItem = {
+  sku: String,
+  name: String,
+  price: Uint64,
+  quantity: Uint32
+};
+
+type PaymentDetails = {
+  wallet: Bytes32,
+  amount: Uint64,
+  tx_hash: Bytes32
+};
+
+type Address = {
+  street: String,
+  apartment: String,
+  city: String,
+  state: String,
+  zip: String,
+  country: String
+};
+
+type BuyerProof = {
+  order_token: String,
+  proof_hash: Bytes32,
+  verified: Bool
+};
+
+type MerchantProof = {
+  order_token: String,
+  item: String,
+  quantity: Uint32,
+  payment_verified: Bool,
+  shipping_ready: Bool
+};
+
+type CourierProof = {
+  route_token: String,
+  destination: String,
+  area: String,
+  instructions: String,
+  package_size: String
+};
+
+type ReturnProof = {
+  return_token: String,
+  authorized: Bool,
+  destination: String,
+  order_ref: String
+};
+
+type AgeProof = {
+  age_verified: Bool,
+  minimum_met: Uint32
+};
+
+// ============================================
+// DEPLOYMENT INFO
+// ============================================
+
+/**
+ * To deploy this contract:
+ * 
+ * 1. Install Midnight CLI:
+ *    npm install -g @midnight-ntwrk/midnight-cli
+ * 
+ * 2. Compile the contract:
+ *    midnight compile selective_disclosure.compact
+ * 
+ * 3. Deploy to testnet:
+ *    midnight deploy --network testnet
+ * 
+ * 4. Interact via SDK:
+ *    import { MidnightAdapter } from '@agility-protocol/headless';
+ *    const adapter = new MidnightAdapter(contractAddress);
+ *    const proof = await adapter.generateProof('merchant_view', inputs);
+ */

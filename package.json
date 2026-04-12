@@ -35,7 +35,8 @@
     "test:all": "npm run test && npm run test:security && npm run test:robustness",
     "demo:offline": "node dist/cli.js demo offline",
     "demo:xrpl": "node dist/cli.js demo xrpl",
-    "demo:cardano": "node dist/cli.js demo cardano"
+    "demo:cardano": "node dist/cli.js demo cardano",
+    "demo:commerce": "cd apps/agility-tools-demo && npm install && npm run dev"
   },
   "keywords": [
     "identity",
